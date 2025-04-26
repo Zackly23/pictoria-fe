@@ -1,0 +1,52 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import MainLayout from '@/layouts/MainLayout.vue'
+import AuthView from '@/views/AuthView.vue'
+import AlbumDetailView from '@/views/AlbumDetailView.vue'
+import ProfileView from '@/views/ProfileView.vue'
+import UploadSectionView from '@/views/UploadSectionView.vue'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      component: MainLayout,
+      children: [
+        {
+          path: '/',
+          name: 'home',
+          component: HomeView,
+        },
+
+        {
+          path: '/album/:id/details',
+          name: 'albumDetails',
+          component: AlbumDetailView,
+        },
+        {
+          path: '/profile/:userId',
+          name: 'profile',
+          component: ProfileView
+        },
+        {
+          path: '/album/:id/edit',
+          name: 'album-edit',
+          component: UploadSectionView
+        }
+      ],
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: AuthView,
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: AuthView,
+    },
+  ],
+})
+
+export default router
