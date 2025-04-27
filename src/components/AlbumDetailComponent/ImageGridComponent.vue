@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import UploadModalComponent from '../UploadSectionComponent/UploadModalComponent.vue'
 
 const isLoading = ref(true)
+const uploadModal = ref(false)
 const viewMode = ref(3)
 const images = ref([
   // sample images
@@ -194,6 +196,7 @@ onMounted(() => {
   <!-- Add Image Button -->
   <div class="flex justify-center">
     <button
+      @click="uploadModal = true"
       class="bg-white border-2 border-dashed border-gray-300 rounded-full p-3 hover:bg-gray-50 transition focus:outline-none cursor-pointer"
     >
       <svg
@@ -226,6 +229,16 @@ onMounted(() => {
         />
       </svg>
       <span class="font-medium">1.2k</span>
+    </div>
+  </div>
+
+  <div>
+    <div
+      v-show="uploadModal"
+      class="fixed inset-0 z-100 flex items-center justify-center  backdrop-blur-sm bg-black/30 h-full"
+      role="dialog"
+    >
+      <UploadModalComponent :openModal="uploadModal"  @closeModal="uploadModal = false"/>
     </div>
   </div>
 </template>

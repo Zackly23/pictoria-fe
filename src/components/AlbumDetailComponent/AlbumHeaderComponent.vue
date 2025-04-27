@@ -27,7 +27,12 @@ const viewMode = ref(1)
         </svg>
       </div>
       <div>
-        <h1 class="text-2xl font-bold">Summer Memories 2025</h1>
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-bold">Summer Memories 2025</h1>
+
+          <span class="text-gray-600 mb-3 hidden md:hidden sm:block">29 Juni 2025</span>
+        </div>
+
         <div class="flex items-center mt-1">
           <span class="text-gray-600">• By John Photographer</span>
           <span class="mx-2 text-gray-400">•</span>
@@ -39,8 +44,9 @@ const viewMode = ref(1)
         </p>
       </div>
     </div>
-    <div class="flex flex-col items-end">
-      <span class="text-gray-600 mb-3">29 Juni 2025</span>
+
+    <div class="md:flex flex-col items-end">
+      <span class="text-gray-600 mb-3 hidden md:block">29 Juni 2025</span>
       <div
         class="flex flex-col md:flex-row items-end md:items-center space-y-2 md:space-y-0 md:space-x-4"
       >
@@ -63,7 +69,9 @@ const viewMode = ref(1)
           </svg>
           <span>Download All</span>
         </button>
-        <div class="flex items-center space-x-1 border border-gray-300 rounded overflow-hidden">
+        <div
+          class="md:flex items-center space-x-1 border border-gray-300 rounded overflow-hidden hidden"
+        >
           <button
             @click="viewMode = 1"
             class="grid-layout-btn px-3 py-1 hover:bg-gray-100 focus:outline-none transition"

@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import MainLayout from '@/layouts/MainLayout.vue'
 import AuthView from '@/views/AuthView.vue'
 import AlbumDetailView from '@/views/AlbumDetailView.vue'
+import ImageDetailView from '@/views/ImageDetailView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import UploadSectionView from '@/views/UploadSectionView.vue'
 
@@ -33,6 +34,11 @@ const router = createRouter({
           path: '/album/:id/edit',
           name: 'album-edit',
           component: UploadSectionView
+        },
+        {
+          path: '/image/:id/temp',
+          name: 'temp-image',
+          component: ImageDetailView
         }
       ],
     },
