@@ -7,7 +7,7 @@ const isLogin = ref(false)
 </script>
 
 <template>
-  <header class="bg-white sticky top-0 shadow-sm z-50">
+  <header class="bg-white sticky top-0 shadow-sm z-200">
     <div class="container mx-auto px-4 py-4">
       <nav class="flex justify-between items-center">
         <div class="flex items-center space-x-2">
@@ -23,18 +23,30 @@ const isLogin = ref(false)
               clip-rule="evenodd"
             />
           </svg>
-          <span class="text-xl font-bold text-blue-500">PixelVault</span>
+          <router-link to="/" class="text-gray-800 text-lg font-semibold">
+            <span class="text-xl font-bold text-blue-500">PixelVault</span>
+          </router-link>
         </div>
         <div class="hidden md:flex space-x-8">
-          <a href="#" class="font-medium text-gray-600 hover:text-blue-500 transition">Home</a>
-          <a href="#" class="font-medium text-gray-600 hover:text-blue-500 transition">Features</a>
-          <a href="#" class="font-medium text-gray-600 hover:text-blue-500 transition">Pricing</a>
-          <a href="#" class="font-medium text-gray-600 hover:text-blue-500 transition">Blog</a>
-          <a href="#" class="font-medium text-gray-600 hover:text-blue-500 transition">Contact</a>
+          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
+            >Home</router-link
+          >
+          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
+            >Features</router-link
+          >
+          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
+            >Pricing</router-link
+          >
+          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
+            >Blog</router-link
+          >
+          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
+            >Contact</router-link
+          >
         </div>
 
         <!-- User Section  -->
-        <div v-show="isLogin" class="flex items-center space-x-4">
+        <div v-if="isLogin" class="flex items-center space-x-4">
           <button
             class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 transition hidden md:block"
           >
@@ -65,39 +77,39 @@ const isLogin = ref(false)
               @click.away="open = false"
               class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
             >
-              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
-                >Profile</a
+              <router-link to="" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
+                >Profile</router-link
               >
-              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
-                >Settings</a
+              <router-link to="" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
+                >Settings</router-link
               >
-              <a
-                href="#"
+              <router-link
+                to=""
                 class="md:hidden block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
-                >Pricing</a
+                >Pricing</router-link
               >
-              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
-                >My Albums</a
+              <router-link to="" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
+                >My Albums</router-link
               >
               <hr class="my-1 border-gray-200" />
-              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
-                >Sign Out</a
+              <router-link to="" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
+                >Sign Out</router-link
               >
             </div>
           </div>
         </div>
 
         <!-- User Section Login  -->
-        <div v-show="!isLogin" class="flex items-center space-x-4">
+        <div v-else class="flex items-center space-x-2">
           <router-link
             to="/login"
-            class=" text-blue-600 px-4 py-2 rounded-full font-medium  transition hidden md:block"
+            class="text-blue-600 px-4 py-2 rounded-full font-medium transition "
           >
             Login
           </router-link>
           <router-link
-          to="/signup"
-            class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 transition hidden md:block"
+            to="/signup"
+            class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 transition "
           >
             Sign up
           </router-link>

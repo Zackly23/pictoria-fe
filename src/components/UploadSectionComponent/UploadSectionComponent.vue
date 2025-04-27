@@ -12,6 +12,8 @@ const selectedTags = ref([])
 const availableTags = ref(['Nature', 'Travel', 'Family', 'Friends', 'Work', 'Food'])
 const tagInput = ref('')
 const privacy = ref('public')
+const targetEmailInput = ref('')
+const selectedEmails = ref([])
 
 // Reset form
 const resetForm = () => {
@@ -69,6 +71,23 @@ function removeTag(tag) {
 }
 
 const filteredTags = computed(() =>
+  availableTags.value.filter((tag) => !selectedTags.value.includes(tag)),
+)
+
+function addTargetEmail() {
+  console.log('addTargetEmail : ', targetEmailInput.value)
+  const newTargetEmail = targetEmailInput.value.trim()
+  if (newTargetEmail && !selectedEmails.value.includes(newTargetEmail)) {
+    selectedEmails.value.push(newTargetEmail)
+    targetEmailInput.value = ''
+  }
+}
+
+function removeTargetEmail(email) {
+  selectedEmails.value = selectedEmails.value.filter((e) => e !== email)
+}
+
+const filteredTargetEmails = computed(() =>
   availableTags.value.filter((tag) => !selectedTags.value.includes(tag)),
 )
 </script>
@@ -193,7 +212,7 @@ const filteredTags = computed(() =>
       ></textarea>
     </div>
 
-    <!-- Tags -->
+    <!-- User Addd -->
     <div class="mb-4">
       <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
 
@@ -304,6 +323,52 @@ const filteredTags = computed(() =>
             <span class="block text-xs text-gray-500">Only you can view this album</span>
           </label>
         </div>
+      </div>
+    </div>
+
+    <div class="mb-4" v-if="privacy === 'restricted'">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Target Email</label>
+
+      <div class="flex">
+        <input
+          v-model="targetEmailInput"
+          @keydown.enter.prevent="addTargetEmail"
+          class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Add a email"
+        />
+        <button
+          @click="addTargetEmail"
+          class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600"
+        >
+          Add
+        </button>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-2">
+        <span
+          v-for="email in selectedEmails"
+          :key="email"
+          class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center mt-2"
+        >
+          {{ email }}
+          <button
+            @click="removeTargetEmail(email)"
+            class="ml-1 text-green-800 hover:text-green-900 focus:outline-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </span>
       </div>
     </div>
 

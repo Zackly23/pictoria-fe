@@ -51,7 +51,7 @@ const copyImageUrl = async (url, index) => {
         to="/"
         class="text-blue-500 hover:text-blue-700 font-medium inline-flex items-center"
       >
-        Explore more images
+        Upload Your Own Images
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 ml-1"
