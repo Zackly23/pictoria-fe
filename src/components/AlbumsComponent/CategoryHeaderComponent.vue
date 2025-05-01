@@ -1,0 +1,31 @@
+<script setup>
+const props = defineProps({
+  currentCategory: {
+    type: String,
+    default: 'Nature',
+  },
+})
+
+</script>
+
+<template>
+  <!-- Category Header -->
+  <section class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-10">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold mb-2" v-text="props.currentCategory + ' Images'"></h1>
+          <p class="text-blue-100">
+            Explore beautiful images in our
+            <span>{{ props.currentCategory }}</span> collection
+          </p>
+        </div>
+        <button
+          class="bg-white text-blue-500 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition"
+        >
+          Upload to This Category
+        </button>
+      </div>
+    </div>
+  </section>
+</template>

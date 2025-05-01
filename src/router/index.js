@@ -6,7 +6,7 @@ import AlbumDetailView from '@/views/AlbumDetailView.vue'
 import ImageDetailView from '@/views/ImageDetailView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import UploadSectionView from '@/views/UploadSectionView.vue'
-
+import AlbumsView from '@/views/AlbumsView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -28,18 +28,23 @@ const router = createRouter({
         {
           path: '/profile/:userId',
           name: 'profile',
-          component: ProfileView
+          component: ProfileView,
         },
         {
           path: '/album/:id/edit',
           name: 'album-edit',
-          component: UploadSectionView
+          component: UploadSectionView,
         },
         {
           path: '/image/:id/temp',
           name: 'temp-image',
-          component: ImageDetailView
-        }
+          component: ImageDetailView,
+        },
+        {
+          path: '/albums',
+          name: 'albums',
+          component: AlbumsView,
+        },
       ],
     },
     {
