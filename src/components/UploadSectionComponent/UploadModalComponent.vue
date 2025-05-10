@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const previewActive = ref(false)
+const file = ref(null)
 const fileName = ref('')
-const imageUrl = ref('') // ini untuk URL hasil upload
+const imageUrl = ref('')
 const uploadSuccess = ref(false)
 
 const props = defineProps({
@@ -11,21 +12,35 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  albumName: {
+    type: String,
+    default: 'Album Name',
+  },
 })
 
-const emit = defineEmits(['closeModal'])
+const imageDescription = ref(props.albumName)
+
+// Optional: jika parent bisa mengubah props.albumName, sinkronkan ulang
+watch(
+  () => props.albumName,
+  (newVal) => {
+    imageDescription.value = newVal
+  }
+)
+
+const emit = defineEmits(['close-modal', 'upload-image'])
 
 const closeModal = () => {
-  emit('closeModal')
+  emit('close-modal')
   resetPreview()
 }
 
 const handleFileChange = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    fileName.value = file.name
+  file.value = event.target.files[0]
+  if (file.value) {
+    fileName.value = file.value.name
     previewActive.value = true
-    imageUrl.value = URL.createObjectURL(file) // simulasikan URL preview
+    imageUrl.value = URL.createObjectURL(file.value) // simulasikan URL preview
   }
 }
 
@@ -34,6 +49,17 @@ const resetPreview = () => {
   fileName.value = ''
   imageUrl.value = ''
   uploadSuccess.value = false
+}
+
+const uploadImage = () => {
+  // Simulasi upload image
+  setTimeout(() => {
+    uploadSuccess.value = true
+    // Emit event to parent component if needed
+    console.log('Image uploaded:', file.value)
+    console.log('Image description:', imageDescription.value)
+    emit('upload-image', file.value)
+  }, 2000) // Simulasi delay 2 detik untuk upload
 }
 </script>
 
@@ -45,7 +71,7 @@ const resetPreview = () => {
       <!-- Tombol X (Close) -->
       <button
         @click="closeModal"
-        class="absolute top-2 right-2 md:top-2 md:right-2 text-gray-400 hover:text-gray-600 border-1 border-gray-400 rounded-full  hover:border-gray-600"
+        class="absolute top-2 right-2 md:top-2 md:right-2 text-gray-400 hover:text-gray-600 border-1 border-gray-400 rounded-full hover:border-gray-600"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -98,12 +124,24 @@ const resetPreview = () => {
             </div>
 
             <div class="rounded-lg overflow-hidden mb-4">
-              <img :src="imageUrl" class="w-full max-h-[350px]" alt="Image preview" />
+              <img
+                :src="imageUrl"
+                class="w-full max-h-[300px] object-contain"
+                alt="Image preview"
+              />
             </div>
 
-            <div>
+            <div class="block mt-4 space-y-2">
+              <input
+                type="text"
+                id="description"
+                name="description"
+                v-data="props.albumName"
+                v-model="imageDescription"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
+              />
               <button
-                @click="uploadSuccess = true"
+                @click="uploadImage"
                 class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition w-full cursor-pointer"
               >
                 Upload Image
@@ -115,3 +153,14 @@ const resetPreview = () => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.tag-badge {
+  transition: all 0.2s ease;
+}
+
+.tag-badge:hover {
+  background-color: #3b82f6;
+  color: white;
+}
+</style>

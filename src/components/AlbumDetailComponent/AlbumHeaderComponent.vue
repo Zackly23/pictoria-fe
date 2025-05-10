@@ -1,7 +1,24 @@
 <script setup>
 import { ref } from 'vue'
 
-const viewMode = ref(1)
+const props = defineProps({
+  albumDetail: {
+    type: Object,
+    required: true,
+  },
+  viewMode: {
+    type: Number,
+    default: 1,
+  },
+})
+
+const emit = defineEmits(['change-view-mode'])
+
+const changeViewMode = (mode) => {
+  emit('change-view-mode', mode)
+
+  console.log('view mode now:', props.viewMode)
+}
 </script>
 
 <template>
@@ -28,28 +45,87 @@ const viewMode = ref(1)
       </div>
       <div>
         <div class="flex justify-between items-center">
-          <h1 class="text-2xl font-bold">Summer Memories 2025</h1>
+          <h1 class="text-2xl font-bold">{{ props.albumDetail.title }}</h1>
 
-          <span class="text-gray-600 mb-3 hidden md:hidden sm:block">29 Juni 2025</span>
+          <span class="text-gray-600 mb-3 hidden md:hidden sm:block">{{
+            props.albumDetail.createdAt
+          }}</span>
         </div>
 
         <div class="flex items-center mt-1">
-          <span class="text-gray-600">• By John Photographer</span>
+          <span class="text-gray-600">• By {{ props.albumDetail.createdBy }}</span>
           <span class="mx-2 text-gray-400">•</span>
-          <span class="text-gray-600">6 photos</span>
+          <span class="text-gray-600">{{ props.albumDetail.photos.length }} photos</span>
         </div>
         <p class="text-gray-500 mt-2">
-          A collection of beautiful summer memories captured during our vacation at the beach and
-          mountains.
+          {{ props.albumDetail.description }}
         </p>
       </div>
     </div>
 
     <div class="md:flex flex-col items-end">
-      <span class="text-gray-600 mb-3 hidden md:block">29 Juni 2025</span>
-      <div
-        class="flex flex-col md:flex-row items-end md:items-center space-y-2 md:space-y-0 md:space-x-4"
-      >
+      <span class="text-gray-600 mb-3 hidden md:block">{{ props.albumDetail.createdAt }}</span>
+      <div class="flex flex-col items-end md:items-center space-y-4 md:space-x-4">
+        <div
+          class="md:flex items-end space-x-1 border border-gray-300 rounded overflow-hidden hidden"
+        >
+          <button
+            @click="changeViewMode(1)"
+            class="grid-layout-btn px-3 py-1 hover:bg-gray-100 focus:outline-none transition"
+            :class="{ 'bg-blue-500 text-white': props.viewMode === 1 }"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" />
+            </svg>
+          </button>
+          <button
+            @click="changeViewMode(3)"
+            class="grid-layout-btn px-3 py-1 hover:bg-gray-100 focus:outline-none transition"
+            :class="{ 'bg-blue-500 text-white': props.viewMode === 3 }"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16m-7 6h7"
+              />
+            </svg>
+          </button>
+          <button
+            @click="changeViewMode(6)"
+            class="grid-layout-btn px-3 py-1 hover:bg-gray-100 focus:outline-none transition"
+            :class="{ 'bg-blue-500 text-white': props.viewMode === 6 }"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 10h16M4 14h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
         <button
           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition flex items-center space-x-2"
         >
@@ -69,65 +145,6 @@ const viewMode = ref(1)
           </svg>
           <span>Download All</span>
         </button>
-        <div
-          class="md:flex items-center space-x-1 border border-gray-300 rounded overflow-hidden hidden"
-        >
-          <button
-            @click="viewMode = 1"
-            class="grid-layout-btn px-3 py-1 hover:bg-gray-100 focus:outline-none transition"
-            :class="{ active: viewMode === 1 }"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2" />
-            </svg>
-          </button>
-          <button
-            @click="viewMode = 3"
-            class="grid-layout-btn px-3 py-1 hover:bg-gray-100 focus:outline-none transition"
-            :class="{ active: viewMode === 3 }"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16m-7 6h7"
-              />
-            </svg>
-          </button>
-          <button
-            @click="viewMode = 6"
-            class="grid-layout-btn px-3 py-1 hover:bg-gray-100 focus:outline-none transition"
-            :class="{ active: viewMode === 6 }"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 10h16M4 14h16M4 18h16"
-              />
-            </svg>
-          </button>
-        </div>
       </div>
     </div>
   </div>

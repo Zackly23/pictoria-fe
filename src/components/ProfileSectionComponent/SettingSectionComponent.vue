@@ -3,6 +3,14 @@ import { ref } from 'vue'
 
 const activeSettingTab = ref('profile')
 const selectedTags = ref(['Portrait', 'Nature', 'Travel', 'Architecture'])
+const props = defineProps({
+  userProfile: {
+    type: Object,
+    required: true,
+  },
+})
+
+const emits = defineEmits(['new-user-profile'])
 
 const popularCategories = [
   'Portrait',
@@ -22,30 +30,41 @@ const bio = ref(
 
 const newTag = ref('')
 
-function removeTag(tag) {
-  selectedTags.value = selectedTags.value.filter((t) => t !== tag)
+const removeTag = (tag) => {
+  props.userProfile.tags = props.userProfile.tags.filter((t) => t !== tag)
 }
 
-function addTag() {
+const addTag = () => {
   const trimmedTag = newTag.value.trim()
-  if (trimmedTag !== '' && !selectedTags.value.includes(trimmedTag)) {
-    selectedTags.value.push(trimmedTag)
+  if (trimmedTag !== '' && !props.userProfile.tags.includes(trimmedTag)) {
+    props.userProfile.tags.push(trimmedTag)
   }
   newTag.value = ''
 }
 
-function addPopularTag(tag) {
-  if (!selectedTags.value.includes(tag)) {
-    selectedTags.value.push(tag)
+const addPopularTag = (tag) => {
+  if (!props.userProfile.tags.includes(tag)) {
+    props.userProfile.tags.push(tag)
   }
+}
+
+const changeCountry = (country) => {
+  console.log('Selected country:', country)
+  // You can add logic here to handle country change if needed
+}
+
+const newUserProfile = () => {
+  const newUserProfileValue = props.userProfile
+  emits('new-user-profile', newUserProfileValue)
+  console.log('Updated User Profile:', props.userProfile)
 }
 </script>
 
 <template>
-  <div class="flex">
+  <div class="block md:flex">
     <!-- Left Sidebar Navigation -->
-    <div class="w-64 border-r border-gray-200 pr-4 h-full">
-      <h2 class="text-2xl font-bold mb-6">Account Settings</h2>
+    <div class="w-full md:w-64 border-gray-200 pr-4 h-full">
+      <h2 class="text-2xl font-bold mb-6 ml-4">Account Settings</h2>
 
       <div class="space-y-1">
         <button
@@ -97,13 +116,13 @@ function addPopularTag(tag) {
     </div>
 
     <!-- Right Content Area -->
-    <div class="flex-1 pl-8">
+    <div class="flex-1 md:pl-8">
       <!-- Profile Settings Content -->
       <div v-show="activeSettingTab === 'profile'" class="space-y-8">
         <!-- Basic Information -->
         <div class="bg-white p-6 rounded-lg shadow-sm">
           <h3 class="text-lg font-medium mb-4">Basic Information</h3>
-          <form class="space-y-4">
+          <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="fullName" class="block text-sm font-medium text-gray-700"
@@ -113,7 +132,7 @@ function addPopularTag(tag) {
                   type="text"
                   id="fullName"
                   name="fullName"
-                  value="John Doe"
+                  v-model="props.userProfile.fullname"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -125,7 +144,7 @@ function addPopularTag(tag) {
                   type="text"
                   id="username"
                   name="username"
-                  value="johndoe"
+                  v-model="props.userProfile.username"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -137,7 +156,7 @@ function addPopularTag(tag) {
                   type="email"
                   id="email"
                   name="email"
-                  value="john.doe@example.com"
+                  v-model="props.userProfile.email"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -149,18 +168,18 @@ function addPopularTag(tag) {
                   type="tel"
                   id="phone"
                   name="phone"
-                  value="+1 (555) 123-4567"
+                  v-model="props.userProfile.phone"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
             </div>
-          </form>
+          </div>
         </div>
 
         <!-- Address Information -->
         <div class="bg-white p-6 rounded-lg shadow-sm">
           <h3 class="text-lg font-medium mb-4">Address Information</h3>
-          <form class="space-y-4">
+          <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="md:col-span-2">
                 <label for="address" class="block text-sm font-medium text-gray-700"
@@ -170,7 +189,7 @@ function addPopularTag(tag) {
                   type="text"
                   id="address"
                   name="address"
-                  value="123 Photography Lane"
+                  v-model="props.userProfile.address"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -180,7 +199,7 @@ function addPopularTag(tag) {
                   type="text"
                   id="city"
                   name="city"
-                  value="San Francisco"
+                  v-model="props.userProfile.city"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -192,7 +211,7 @@ function addPopularTag(tag) {
                   type="text"
                   id="state"
                   name="state"
-                  value="California"
+                  v-model="props.userProfile.state"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -204,7 +223,7 @@ function addPopularTag(tag) {
                   type="text"
                   id="zipcode"
                   name="zipcode"
-                  value="94105"
+                  v-model="props.userProfile.zipcode"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -213,6 +232,8 @@ function addPopularTag(tag) {
                 <select
                   id="country"
                   name="country"
+                  @change="changeCountry($event.target.value)"
+                  @keyup.enter="changeCountry($event.target.value)"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 >
                   <option value="US" selected>United States</option>
@@ -223,13 +244,13 @@ function addPopularTag(tag) {
                 </select>
               </div>
             </div>
-          </form>
+          </div>
         </div>
 
         <!-- Photography Preferences -->
         <div class="bg-white p-6 rounded-lg shadow-sm">
           <h3 class="text-lg font-medium mb-4">Photography Preferences</h3>
-          <form class="space-y-6" @submit.prevent>
+          <div class="space-y-6" @submit.prevent>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-3"
                 >Photography Categories</label
@@ -238,7 +259,7 @@ function addPopularTag(tag) {
               <!-- Selected Categories -->
               <div class="mb-3 flex flex-wrap gap-2">
                 <span
-                  v-for="(tag, index) in selectedTags"
+                  v-for="(tag, index) in props.userProfile.tags"
                   :key="index"
                   class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center"
                 >
@@ -311,7 +332,7 @@ function addPopularTag(tag) {
               <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
               <textarea
                 id="bio"
-                v-model="bio"
+                v-model="props.userProfile.bio"
                 rows="4"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
               ></textarea>
@@ -319,13 +340,46 @@ function addPopularTag(tag) {
                 Brief description that appears on your profile. Maximum 200 characters.
               </p>
             </div>
-          </form>
+          </div>
+        </div>
+
+        <!-- Job Title and Organization -->
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <h3 class="text-lg font-medium mb-4">Professional Information</h3>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="jobTitle" class="block text-sm font-medium text-gray-700"
+                  >Job Title</label
+                >
+                <input
+                  type="text"
+                  id="jobTitle"
+                  name="jobTitle"
+                  v-model="props.userProfile.jobTitle"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
+                />
+              </div>
+              <div>
+                <label for="organization" class="block text-sm font-medium text-gray-700"
+                  >Organization</label
+                >
+                <input
+                  type="text"
+                  id="organization"
+                  name="organization"
+                  v-model="props.userProfile.company"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Social Media Links -->
         <div class="bg-white p-6 rounded-lg shadow-sm">
           <h3 class="text-lg font-medium mb-4">Social Media Links</h3>
-          <form class="space-y-4">
+          <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
@@ -372,13 +426,13 @@ function addPopularTag(tag) {
                 />
               </div>
             </div>
-          </form>
+          </div>
         </div>
 
         <!-- Save Button -->
         <div class="flex justify-end">
           <button
-            type="submit"
+            @click="newUserProfile(props.userProfile)"
             class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Save Profile Changes
@@ -390,7 +444,7 @@ function addPopularTag(tag) {
       <div v-show="activeSettingTab === 'password'" class="space-y-8">
         <div class="bg-white p-6 rounded-lg shadow-sm">
           <h3 class="text-lg font-medium mb-4">Change Password</h3>
-          <form class="space-y-4">
+          <div class="space-y-4">
             <div>
               <label for="current-password" class="block text-sm font-medium text-gray-700"
                 >Current Password</label
@@ -435,7 +489,7 @@ function addPopularTag(tag) {
                 Update Password
               </button>
             </div>
-          </form>
+          </div>
         </div>
 
         <!-- Two-Factor Authentication -->

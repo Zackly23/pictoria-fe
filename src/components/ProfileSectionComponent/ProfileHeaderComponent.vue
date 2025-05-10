@@ -1,0 +1,121 @@
+<script setup>
+const props = defineProps({
+  userProfile: {
+    type: Object,
+    required: true,
+  },
+})
+</script>
+
+<template>
+  <!-- Profile Header -->
+  <section class="bg-white border-b border-gray-200">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row items-center md:items-start">
+        <div
+          class="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-4xl font-bold mb-4 md:mb-0 md:mr-6"
+        >
+          JD
+        </div>
+        <div class="text-center md:text-left flex-1">
+          <div class="flex flex-col md:flex-row md:items-center mb-2">
+            <h1 class="text-3xl font-bold">{{ props.userProfile.fullname }}</h1>
+            <div class="mt-2 md:mt-0 md:ml-4 flex items-center justify-center md:justify-start">
+              <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 mr-1"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                {{ props.userProfile.subscription }}
+              </span>
+            </div>
+          </div>
+          <p class="text-gray-600 mb-4">
+            {{ props.userProfile.jobTitle }} • {{ props.userProfile.city }},
+            {{ props.userProfile.state }}
+          </p>
+          <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
+            <span
+              v-for="(tag, index) in props.userProfile.tags"
+              :key="index"
+              class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm tag-badge"
+              >{{ tag }}</span
+            >
+          </div>
+          <p class="text-gray-700 max-w-2xl mb-6">
+            {{ props.userProfile.bio }}
+          </p>
+          <div class="flex flex-wrap justify-center md:justify-start gap-4">
+            <button
+              class="bg-blue-500 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-600 transition"
+            >
+              Follow
+            </button>
+            <button
+              class="border border-gray-300 text-gray-700 px-6 py-2 rounded-full font-medium hover:bg-gray-50 transition"
+            >
+              Message
+            </button>
+            <a
+              href="#"
+              class="text-blue-500 hover:text-blue-700 px-6 py-2 font-medium flex items-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 mr-1"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"
+                />
+              </svg>
+              Share Profile
+            </a>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="bg-blue-50 rounded-lg p-4 text-center">
+            <div class="flex space-x-8 mb-2">
+              <div>
+                <p class="text-2xl font-bold">{{ props.userProfile.stats.images }}</p>
+                <p class="text-gray-600 text-sm">Images</p>
+              </div>
+              <div>
+                <p class="text-2xl font-bold">{{ props.userProfile.stats.followers }}</p>
+                <p class="text-gray-600 text-sm">Followers</p>
+              </div>
+              <div>
+                <p class="text-2xl font-bold">{{ props.userProfile.stats.following }}</p>
+                <p class="text-gray-600 text-sm">Following</p>
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-blue-100">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Storage:</span>
+                <span class="font-medium"
+                  >{{ props.userProfile.stats.storageUsed }} /
+                  {{ props.userProfile.stats.storageTotal }}</span
+                >
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-blue-500 h-2 rounded-full"
+                  :style="{ width: `${props.userProfile.stats.storagePercentage}%` }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>

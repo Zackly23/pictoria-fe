@@ -5,6 +5,37 @@ const tags = ref(['Beach', 'Mountain', 'City']) // contoh data, bisa disesuaikan
 const filterTag = ref('')
 const sortBy = ref('date')
 const sortOrder = ref('asc')
+
+const props = defineProps({
+  albumDetail: {
+    type: Object,
+    required: true,
+  },
+  sortBy: {
+    type: String,
+    default: 'date',
+  },
+
+  sortOrder: {
+    type: String,
+    default: 'asc',
+  },
+})
+
+const emits = defineEmits(['change-sort-by', 'change-sort-order'])
+
+const changeSortBy = (sort) => {
+  console.log('sort by : ', sort)
+  emits('change-sort-by', sort)
+  console.log('sort by now : ', props.sortBy)
+}
+
+const changeSortOrder = (sort) => {
+  let sortOrder = sort === 'asc' ? 'desc' : 'asc'
+  emits('change-sort-order', sortOrder)
+
+  console.log('sort order now : ', props.sortOrder)
+}
 </script>
 
 <template>
@@ -18,7 +49,7 @@ const sortOrder = ref('asc')
       >
         All
       </button>
-      <template v-for="tag in tags" :key="tag">
+      <template v-for="tag in props.albumDetail.tags" :key="tag">
         <button
           @click="filterTag = tag"
           class="px-3 py-1 rounded text-sm"
@@ -32,21 +63,22 @@ const sortOrder = ref('asc')
       <label for="sortBy" class="mr-2 text-gray-600">Sort by:</label>
       <select
         id="sortBy"
-        v-model="sortBy"
+        @change="changeSortBy($event.target.value)"
+        @keyup.enter="changeSortBy($event.target.value)"
         class="mr-2 px-3 py-1 border border-gray-300 rounded bg-white"
       >
         <option value="date">Date</option>
         <option value="likes">Popularity</option>
         <option value="title">Title</option>
       </select>
-      <button @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'" class="p-1">
+      <button @click="changeSortOrder(props.sortOrder)" class="p-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
-          :class="{ 'rotate-180': sortOrder === 'desc' }"
+          :class="{ 'rotate-180': props.sortOrder === 'desc' }"
         >
           <path
             stroke-linecap="round"

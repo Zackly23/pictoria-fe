@@ -1,25 +1,25 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import UploadModalComponent from '../UploadSectionComponent/UploadModalComponent.vue'
+import ImagePreviewZoomComponent from '../UploadSectionComponent/ImagePreviewZoomComponent.vue'
 
 const isLoading = ref(true)
 const uploadModal = ref(false)
-const viewMode = ref(3)
-const images = ref([
-  // sample images
-  {
-    id: 1,
-    src: 'image1.jpg',
-    title: 'Image 1',
-    likes: 10,
-    date: '2024-04-25',
-    tags: ['tag1', 'tag2'],
-  },
-  { id: 2, src: 'image2.jpg', title: 'Image 2', likes: 20, date: '2024-04-24', tags: ['tag2'] },
-  { id: 3, src: 'image3.jpg', title: 'Image 3', likes: 5, date: '2024-04-23', tags: ['tag3'] },
-])
+const previewModal = ref(false)
+const imagePreview = ref()
 
-const filteredImages = computed(() => images.value)
+const props = defineProps({
+  albumDetail: {
+    type: Object,
+    required: true,
+  },
+  viewMode: {
+    type: Number,
+    default: 3,
+  },
+})
+
+const emits = defineEmits(['new-image-upload'])
 
 const openLightbox = (index) => {
   console.log('Open lightbox for index', index)
@@ -28,6 +28,21 @@ const openLightbox = (index) => {
 const toggleLike = (index) => {
   images.value[index].likes++
 }
+
+const openPreviewImageModal = (imgId) => {
+  console.log('image id ', imgId)
+  previewModal.value = true
+  imagePreview.value = props.albumDetail.photos.find((img) => img.id === imgId)
+  console.log('preview image : ', imagePreview.value)
+}
+
+const uploadImage = (image) => {
+  console.log('Image uploaded in imagegrid :', image)
+  emits('new-image-upload', image)
+  uploadModal.value = false
+}
+
+console.log('album detail : ', props.albumDetail)
 
 onMounted(() => {
   setTimeout(() => {
@@ -40,18 +55,18 @@ onMounted(() => {
   <div class="mb-8">
     <!-- Loaded Images -->
     <div>
-      <div v-if="viewMode === 1" class="grid grid-cols-1 gap-6">
+      <div v-if="props.viewMode === 1" class="grid grid-cols-1 gap-6 place-items-center">
         <div
-          v-for="(image, index) in images"
+          v-for="(image, index) in props.albumDetail.photos"
           :key="image.id"
-          class="relative-div bg-white rounded-lg overflow-hidden shadow-sm"
+          class="relative-div bg-white rounded-lg overflow-hidden shadow-sm w-[75%] aspect-[4/3]"
         >
-          <img :src="image.src" :alt="image.title" class="w-full h-auto object-cover" />
+          <img :src="image.url" :alt="image.title" class="w-full h-full object-cover" />
           <div class="absolute-div p-2 rounded-full shadow">
-            <button @click="() => openLightbox(index)" class="p-2 rounded-full shadow">
+            <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full shadow">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-10 w-10 text-gray-800"
+                class="h-24 w-24 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -67,7 +82,7 @@ onMounted(() => {
           </div>
           <div class="p-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-medium">{{ image.title }}</h3>
+              <h3 class="font-medium">{{ image.description }}</h3>
               <div class="flex items-center space-x-1">
                 <button
                   @click="() => toggleLike(index)"
@@ -104,18 +119,18 @@ onMounted(() => {
         </div>
       </div>
 
-      <div v-if="viewMode === 3" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div v-if="props.viewMode === 3" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
-          v-for="(image, index) in images"
+          v-for="(image, index) in props.albumDetail.photos"
           :key="image.id"
           class="relative-div bg-white rounded-lg overflow-hidden shadow-sm"
         >
-          <img :src="image.src" :alt="image.title" class="w-full h-48 object-cover" />
+          <img :src="image.url" :alt="image.title" class="w-full h-48 object-cover" />
           <div class="absolute-div p-2 rounded-full shadow">
-            <button @click="() => openLightbox(index)" class="p-2 rounded-full">
+            <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-16 w-16 text-gray-600"
+                class="h-16 w-16 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -131,7 +146,7 @@ onMounted(() => {
           </div>
           <div class="p-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-medium">{{ image.title }}</h3>
+              <h3 class="font-medium">{{ image.description }}</h3>
               <div class="flex items-center space-x-1">
                 <button
                   @click="() => toggleLike(index)"
@@ -155,23 +170,23 @@ onMounted(() => {
                 <span>{{ image.likes }}</span>
               </div>
             </div>
-            <p class="text-sm text-gray-500">{{ image.date }}</p>
+            <p class="text-sm text-gray-500">{{ image.createdAt }}</p>
           </div>
         </div>
       </div>
 
-      <div v-if="viewMode === 6" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div v-if="props.viewMode === 6" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <div
-          v-for="(image, index) in images"
+          v-for="(image, index) in props.albumDetail.photos"
           :key="image.id"
           class="relative-div bg-white rounded-lg overflow-hidden shadow-sm"
         >
-          <img :src="image.src" :alt="image.title" class="w-full h-32 object-cover" />
+          <img :src="image.url" :alt="image.title" class="w-full h-32 object-cover" />
           <div class="absolute-div p-2 rounded-full shadow">
-            <button @click="() => openLightbox(index)" class="p-2 rounded-full shadow">
+            <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full shadow">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-gray-800"
+                class="h-5 w-5 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -186,7 +201,7 @@ onMounted(() => {
             </button>
           </div>
           <div class="p-2">
-            <h3 class="text-sm font-medium truncate">{{ image.title }}</h3>
+            <h3 class="text-sm font-medium truncate">{{ image.description }}</h3>
           </div>
         </div>
       </div>
@@ -235,11 +250,32 @@ onMounted(() => {
   <div>
     <div
       v-show="uploadModal"
-      class="fixed inset-0 z-100 flex items-center justify-center  backdrop-blur-sm bg-black/30 h-full"
+      class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
       role="dialog"
     >
-      <UploadModalComponent :openModal="uploadModal"  @closeModal="uploadModal = false"/>
+      <UploadModalComponent
+        :upload-modal="uploadModal"
+        :album-name="props.albumDetail.title"
+        @close-modal="uploadModal = false"
+        @upload-image="uploadImage"
+      />
     </div>
+  </div>
+
+  <div>
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="previewModal"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <ImagePreviewZoomComponent
+          :open-modal="previewModal"
+          @close-modal="previewModal = false"
+          :image="imagePreview"
+        />
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -271,5 +307,20 @@ onMounted(() => {
 .relative-div:hover .absolute-div {
   opacity: 1; /* Muncul saat div di-hover */
   pointer-events: auto; /* Mengaktifkan interaksi */
+}
+
+.fade-zoom-enter-active,
+.fade-zoom-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-zoom-enter-from,
+.fade-zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+.fade-zoom-enter-to,
+.fade-zoom-leave-from {
+  opacity: 1;
+  transform: scale(1);
 }
 </style>
