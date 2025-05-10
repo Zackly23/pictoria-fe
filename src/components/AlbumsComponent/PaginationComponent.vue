@@ -11,6 +11,10 @@ const props = defineProps({
     type: Number,
     default: 10,
   },
+  position: {
+    type: String,
+    default: 'center',
+  },
 })
 
 const firstHalfPageNumbers = computed(() => {
@@ -37,7 +41,7 @@ const changePaginationNumber = (number) => {
 <template>
   <!-- Pagination -->
   <section class="container mx-auto px-4 py-8">
-    <div class="flex justify-center">
+    <div class="flex" :class="`justify-${props.position}`">
       <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
         <!-- Previous Button -->
         <button

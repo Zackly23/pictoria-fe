@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 
+const emits = defineEmits(['new-store-album'])
+
 const dragActive = ref(false)
 const files = ref([])
 const uploading = ref(false)
@@ -30,10 +32,27 @@ const simulateUpload = () => {
 
   // Simulasi delay upload (contoh 2 detik)
   setTimeout(() => {
+    storeNewAlbum()
     alert('Upload berhasil!')
     resetForm()
     uploading.value = false
   }, 2000)
+}
+
+const storeNewAlbum = () => {
+  let status = 200
+  // Simulate storing the new album in a database or API
+  console.log('Storing new album...')
+  console.log('Title:', albumTitle.value)
+  console.log('Description:', albumDescription.value)
+  console.log('Files:', files.value)
+  console.log('Tags:', selectedTags.value)
+  console.log('Privacy:', privacy.value)
+  console.log('Target Emails:', selectedEmails.value)
+
+  if (status == 200) {
+    emits('new-store-album')
+  }
 }
 
 function handleFileChange(e) {
@@ -45,6 +64,7 @@ function handleFileChange(e) {
       size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
       url: URL.createObjectURL(file),
       raw: file,
+      description: '', // Add a description field for each file
     })
   })
 }
@@ -156,7 +176,7 @@ const filteredTargetEmails = computed(() =>
         :key="file.id"
         class="relative rounded-lg overflow-hidden bg-gray-100"
       >
-        <img :src="file.url" class="w-full h-32 object-cover" />
+        <img :src="file.url" class="w-full h-40 object-cover" />
         <div
           class="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-200"
         >
@@ -179,9 +199,15 @@ const filteredTargetEmails = computed(() =>
           </button>
         </div>
         <div
-          class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1 truncate"
+          class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 pl-2 truncate space-y-1"
         >
-          <div class="truncate">{{ file.name }}</div>
+          <input
+            type="text"
+            v-model="file.description"
+            class="w-full bg-transparent border-none text-white placeholder:text-white/70 focus:ring-0 focus:outline-none"
+            placeholder="Add a description"
+          />
+          <!-- <div class="truncate">{{ file.name }}</div> -->
           <div class="text-gray-300">{{ file.size }}</div>
         </div>
       </div>
@@ -376,7 +402,7 @@ const filteredTargetEmails = computed(() =>
     <div class="flex justify-end gap-4">
       <!-- Cancel Button -->
       <button
-        class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        class="cursor-pointer px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         @click="resetForm"
       >
         Cancel
@@ -384,7 +410,7 @@ const filteredTargetEmails = computed(() =>
 
       <!-- Upload Button -->
       <button
-        class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="cursor-pointer px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="files.length === 0 || !albumTitle || uploading"
         @click="simulateUpload"
       >
