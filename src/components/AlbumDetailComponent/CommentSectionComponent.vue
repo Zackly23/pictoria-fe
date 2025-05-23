@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 
-const showComments = ref(true)
+const showComments = ref(false)
 const commentText = ref('')
 const comments = ref([
   { id: 1, author: 'User 1', text: 'This is a comment.', date: '2025-04-26' },

@@ -1,6 +1,15 @@
 <script setup>
 import { ref } from 'vue'
+import ResetPasswordModalComponent from './ResetPasswordModalComponent.vue'
+import TwoFactorAuthModalComponent from './TwoFactorAuthModalComponent.vue'
+import DeactivateAccountModalComponent from './DeactivateAccountModalComponent.vue'
+import DeleteAccountModalComponent from './DeleteAccountModalComponent.vue'
 
+const TFAEnabled = ref(false)
+const twoFactorModalOpen = ref(false)
+const resetPasswordModalOpen = ref(false)
+const deactivateAccountModalOpen = ref(false)
+const deleteAccountModalOpen = ref(false)
 const activeSettingTab = ref('profile')
 const selectedTags = ref(['Portrait', 'Nature', 'Travel', 'Architecture'])
 const props = defineProps({
@@ -29,6 +38,10 @@ const bio = ref(
 )
 
 const newTag = ref('')
+
+const verifyTFAToggle = () => {
+  TFAEnabled.value = true
+}
 
 const removeTag = (tag) => {
   props.userProfile.tags = props.userProfile.tags.filter((t) => t !== tag)
@@ -64,7 +77,7 @@ const newUserProfile = () => {
   <div class="block md:flex">
     <!-- Left Sidebar Navigation -->
     <div class="w-full md:w-64 border-gray-200 pr-4 h-full">
-      <h2 class="text-2xl font-bold mb-6 ml-4">Account Settings</h2>
+      <!-- <h2 class="text-2xl font-bold mb-6 ml-4">Account Settings</h2> -->
 
       <div class="space-y-1">
         <button
@@ -387,6 +400,7 @@ const newUserProfile = () => {
                   type="url"
                   id="website"
                   name="website"
+                  v-model="props.userProfile.socialMedias.website"
                   value="https://johndoephotography.com"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
@@ -400,6 +414,7 @@ const newUserProfile = () => {
                   id="instagram"
                   name="instagram"
                   value="@johndoephotos"
+                  v-model="props.userProfile.socialMedias.instagram"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -412,6 +427,7 @@ const newUserProfile = () => {
                   id="facebook"
                   name="facebook"
                   value="johnDoephotography"
+                  v-model="props.userProfile.socialMedias.facebook"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -422,6 +438,7 @@ const newUserProfile = () => {
                   id="twitter"
                   name="twitter"
                   value="@johndoephotos"
+                  v-model="props.userProfile.socialMedias.twitter"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
               </div>
@@ -446,48 +463,16 @@ const newUserProfile = () => {
           <h3 class="text-lg font-medium mb-4">Change Password</h3>
           <div class="space-y-4">
             <div>
-              <label for="current-password" class="block text-sm font-medium text-gray-700"
-                >Current Password</label
-              >
-              <input
-                type="password"
-                id="current-password"
-                name="current-password"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-              />
-            </div>
-            <div>
-              <label for="new-password" class="block text-sm font-medium text-gray-700"
-                >New Password</label
-              >
-              <input
-                type="password"
-                id="new-password"
-                name="new-password"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-              />
-              <p class="mt-1 text-sm text-gray-500">
-                Password must be at least 8 characters and include a number and a special character
-              </p>
-            </div>
-            <div>
-              <label for="confirm-password" class="block text-sm font-medium text-gray-700"
-                >Confirm New Password</label
-              >
-              <input
-                type="password"
-                id="confirm-password"
-                name="confirm-password"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-              />
-            </div>
-            <div class="pt-4">
               <button
-                type="submit"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                @click="resetPasswordModalOpen = true"
+                type="button"
+                class="cursor-pointer inline-flex items-center px-4 py-2 border border-neutral-300 text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500"
               >
-                Update Password
+                Reset Password
               </button>
+              <p class="mt-2 text-neutral-600 hover:text-neutral-500 text-sm font-medium">
+                If you forgot your password, click here to reset it.
+              </p>
             </div>
           </div>
         </div>
@@ -502,22 +487,36 @@ const newUserProfile = () => {
               </p>
             </div>
             <div class="flex items-center">
-              <span class="text-sm text-green-600 font-medium mr-3">Enabled</span>
+              <span
+                class="text-sm font-medium mr-3"
+                :class="TFAEnabled ? 'text-green-600' : 'text-gray-400'"
+              >
+                {{ TFAEnabled ? 'Enabled' : 'Disabled' }}
+              </span>
               <button
-                type="button"
-                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-green-500 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                :class="[
+                  'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 transition-colors duration-200 ease-in-out',
+                  TFAEnabled ? 'bg-green-500 border-green-500' : 'bg-gray-300 border-gray-300',
+                ]"
                 role="switch"
-                aria-checked="true"
+                :aria-checked="TFAEnabled.toString()"
               >
                 <span
                   aria-hidden="true"
-                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-5"
+                  :class="[
+                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                    TFAEnabled ? 'translate-x-5' : 'translate-x-0',
+                  ]"
                 ></span>
               </button>
             </div>
           </div>
           <div class="mt-4">
-            <button type="button" class="text-blue-600 hover:text-blue-500 text-sm font-medium">
+            <button
+              @click="() => (twoFactorModalOpen = true)"
+              type="button"
+              class="cursor-pointer text-blue-600 hover:text-blue-500 text-sm font-medium"
+            >
               Configure Two-Factor Authentication
             </button>
           </div>
@@ -530,7 +529,8 @@ const newUserProfile = () => {
             <div>
               <button
                 type="button"
-                class="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                @click="() => (deactivateAccountModalOpen = true)"
+                class="cursor-pointer inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 Deactivate Account
               </button>
@@ -540,8 +540,9 @@ const newUserProfile = () => {
             </div>
             <div>
               <button
+                @click="() => (deleteAccountModalOpen = true)"
                 type="button"
-                class="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                class="cursor-pointer inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 Delete Account
               </button>
@@ -553,5 +554,56 @@ const newUserProfile = () => {
         </div>
       </div>
     </div>
+  </div>
+
+  <div>
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="resetPasswordModalOpen"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <ResetPasswordModalComponent @close-modal="resetPasswordModalOpen = false" />
+      </div>
+    </transition>
+
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="twoFactorModalOpen"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <TwoFactorAuthModalComponent
+          @close-modal="twoFactorModalOpen = false"
+          @verify-tfa="verifyTFAToggle"
+        />
+      </div>
+    </transition>
+
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="deactivateAccountModalOpen"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <DeactivateAccountModalComponent
+          @close-modal="deactivateAccountModalOpen = false"
+          @verify-tfa="verifyTFAToggle"
+        />
+      </div>
+    </transition>
+
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="deleteAccountModalOpen"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <DeleteAccountModalComponent
+          @close-modal="deleteAccountModalOpen = false"
+          @verify-tfa="verifyTFAToggle"
+        />
+      </div>
+    </transition>
   </div>
 </template>

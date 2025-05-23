@@ -1,21 +1,44 @@
 <script setup>
-const categories = [
+import { ref } from 'vue';
+
+const AlbumByCategories = ref([
   {
+    id: 1,
     title: 'Nature',
     count: 1254,
     image: 'jkt48.jpg',
   },
   {
+    id: 2,
     title: 'Architecture',
     count: 879,
     image: 'husniati-salma-U63WVnKpOws-unsplash.jpg',
   },
   {
+    id: 3,
     title: 'Travel',
     count: 2156,
     image: 'bradford-zak-l2Z909j1vZE-unsplash.jpg',
   },
-]
+  {
+    id: 4,
+    title: 'Cat',
+    count: 1254,
+    image: 'jkt48.jpg',
+  },
+  {
+    id: 5,
+    title: 'Dog',
+    count: 879,
+    image: 'husniati-salma-U63WVnKpOws-unsplash.jpg',
+  },
+  {
+    id: 6,
+    title: 'Website',
+    count: 2156,
+    image: 'bradford-zak-l2Z909j1vZE-unsplash.jpg',
+  },
+])
 </script>
 
 <template>
@@ -23,7 +46,7 @@ const categories = [
     <h2 class="text-3xl font-bold text-center mb-8">Explore by Category</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <a v-for="(category, index) in categories" :key="index" href="#" class="block group">
+      <a v-for="category in AlbumByCategories" :key="category.id" href="#" class="block group">
         <div class="relative rounded-lg overflow-hidden shadow-md">
           <img
             :src="`/src/assets/images/${category.image}`"

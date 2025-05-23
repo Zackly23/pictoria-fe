@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import UploadSectionComponent from '@/components/UploadSectionComponent/UploadSectionComponent.vue'
 import AlbumSectionComponent from '@/components/ProfileSectionComponent/AlbumSectionComponent.vue'
 import SettingSectionComponent from '@/components/ProfileSectionComponent/SettingSectionComponent.vue'
@@ -7,11 +7,34 @@ import ProfileStatsComponent from '@/components/ProfileSectionComponent/ProfileS
 import ProfileHeaderComponent from '@/components/ProfileSectionComponent/ProfileHeaderComponent.vue'
 import ProfileNavigationComponent from '@/components/ProfileSectionComponent/ProfileNavigationComponent.vue'
 
-const activeTab = ref('albums')
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+
+const activeTab = ref(route.query.activeTab || 'albums')
 const viewMode = ref('grid')
+
+// Watch for changes in query param and update activeTab
+watch(
+  () => route.query.activeTab,
+  (newTab) => {
+    activeTab.value = newTab || 'albums'
+  }
+)
+
+// Update query param when activeTab changes
+watch(
+  activeTab,
+  (newTab) => {
+    if (route.query.activeTab !== newTab) {
+      router.replace({ query: { ...route.query, activeTab: newTab } })
+    }
+  }
+)
 const sortBy = ref('recent')
 const userProfile = ref({
-  fullname: 'John Doe',
+  fullname: 'David Dwi Nugroho',
   username: 'johndoe',
   email: 'johndoe@gmail.com',
   phone: '+1 234 567 8900',
@@ -35,10 +58,10 @@ const userProfile = ref({
     storagePercentage: 31,
   },
   socialMedias: {
-    instagram: '',
-    facebook: '',
-    twitter: '',
-    website: '',
+    instagram: '@johndoe',
+    facebook: 'johdoeganteng',
+    twitter: '@johdoe',
+    website: 'www.johndoeganten.com',
   },
 })
 
@@ -256,11 +279,9 @@ const newUserProfile = (user) => {
     </div>
 
     <!-- Settings Tab Content -->
-    <SettingSectionComponent
-      v-show="activeTab === 'settings'"
-      :user-profile="userProfile"
-      @new-user-profile="newUserProfile"
-    />
+    <div v-show="activeTab === 'settings'">
+      <SettingSectionComponent :user-profile="userProfile" @new-user-profile="newUserProfile" />
+    </div>
   </section>
 </template>
 

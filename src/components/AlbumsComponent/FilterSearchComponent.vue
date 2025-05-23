@@ -41,37 +41,51 @@ const changeSortCategory = (sort) => {
 <template>
   <!-- Filtering and Sorting -->
   <!-- Filters and Search -->
-  <section class="container mx-auto px-4 py-6 ">
+  <section class="container mx-auto px-4 sm:pt-6 sm:pb-6 pt-6">
     <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
       <!-- Search Box -->
-      <div class="w-full md:w-64 relative">
-        <input
-          type="text"
-          placeholder="Search by name or tags..."
-          class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition"
-          @input="changeSearch($event.target.value)"
-          @keyup.enter="changeSearch($event.target.value)"
-        />
-        <div class="absolute left-3 top-2.5 text-gray-400">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+      <div class="flex space-x-2 sm:block sm:space-x-0 w-full md:w-64 relative">
+        <div>
+          <input
+            type="text"
+            placeholder="Search by name or tags..."
+            class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition"
+            @input="changeSearch($event.target.value)"
+            @keyup.enter="changeSearch($event.target.value)"
+          />
+          <div class="absolute left-3 top-2.5 text-gray-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="sm:hidden">
+          <select
+            class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition bg-white"
+            @change="changeSortCategory($event.target.value)"
+            @keyup.enter="changeSortCategory($event.target.value)"
           >
-            <path
-              fill-rule="evenodd"
-              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-              clip-rule="evenodd"
-            />
-          </svg>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="popular">Most Popular</option>
+            <option value="likes">Most Likes</option>
+          </select>
         </div>
       </div>
 
       <!-- Filters -->
       <div class="flex items-center space-x-4">
         <!-- Sort dropdown -->
-        <div>
+        <div class="hidden sm:block">
           <select
             class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition bg-white"
             @change="changeSortCategory($event.target.value)"
@@ -85,7 +99,7 @@ const changeSortCategory = (sort) => {
         </div>
 
         <!-- View type toggle -->
-        <div class="flex bg-gray-200 rounded-lg p-1">
+        <div class="hidden sm:flex bg-gray-200 rounded-lg p-1">
           <button
             class="px-3 py-1 rounded-md flex items-center space-x-1 transition"
             :class="

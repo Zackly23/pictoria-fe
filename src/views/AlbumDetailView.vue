@@ -5,8 +5,10 @@ import ImageGridComponent from '@/components/AlbumDetailComponent/ImageGridCompo
 import URLCopyComponent from '@/components/AlbumDetailComponent/URLCopyComponent.vue'
 import CommentSectionComponent from '@/components/AlbumDetailComponent/CommentSectionComponent.vue'
 import { ref } from 'vue'
+import video from '@/assets/video/Facebook Story_2.mp4'
+import video2 from '@/assets/video/Facebook Story.mp4'
 
-const viewMode = ref(3) // 1 for grid view, 2 for list view
+const viewMode = ref(1) // 1 for grid view, 2 for list view
 const sortOrder = ref('asc')
 const sortBy = ref('date')
 const albumDetail = ref({
@@ -17,9 +19,11 @@ const albumDetail = ref({
   createdAt: '2025-06-29',
   createdBy: 'John Photographer',
   tags: ['Nature', 'Technology', 'Vacation', 'Bali'],
-  photos: [
+  likes: '1.2 k',
+  medias: [
     {
       id: 1,
+      type: 'image',
       url: 'https://picsum.photos/200/300',
       description: 'A beautiful sunset at the beach.',
       createdAt: '2025-06-29',
@@ -28,6 +32,7 @@ const albumDetail = ref({
     },
     {
       id: 2,
+      type: 'image',
       url: 'https://picsum.photos/200/300',
       description: 'Hiking in the mountains.',
       createdAt: '2025-06-29',
@@ -36,6 +41,7 @@ const albumDetail = ref({
     },
     {
       id: 3,
+      type: 'image',
       url: 'https://images.dog.ceo/breeds/puggle/IMG_075018.jpg',
       description: 'A beautiful sunset at the beach.',
       createdAt: '2025-06-29',
@@ -44,11 +50,31 @@ const albumDetail = ref({
     },
     {
       id: 4,
+      type: 'image',
       url: 'https://images.dog.ceo/breeds/schnauzer-giant/n02097130_1761.jpg',
       description: 'A beautiful sunset at the beach.',
       createdAt: '2025-06-29',
       createdBy: 'John Photographer',
       likes: 10,
+    },
+
+    {
+      id: 5,
+      url: video,
+      type: 'video',
+      description: 'A beautiful woman.',
+      createdAt: '2025-06-29',
+      createdBy: 'John Photographer',
+      likes: 100,
+    },
+       {
+      id: 6,
+      url: video2,
+      type: 'video',
+      description: 'A beautiful woman.',
+      createdAt: '2025-06-29',
+      createdBy: 'John Photographer',
+      likes: 100,
     },
     // Add more photos as needed
   ],
@@ -84,8 +110,8 @@ const changeSortOrder = (sort) => {
 
 const uploadNewImage = (image) => {
   console.log('New image uploaded:', image)
-  albumDetail.value.photos.push({
-    id: albumDetail.value.photos.length + 1,
+  albumDetail.value.medias.push({
+    id: albumDetail.value.medias.length + 1,
     url: image.url,
     description: image.description,
     createdAt: new Date().toISOString(),
@@ -113,7 +139,11 @@ const uploadNewImage = (image) => {
           @change-sort-order="changeSortOrder"
         />
 
-        <ImageGridComponent :album-detail="albumDetail" :view-mode="viewMode" @new-image-upload="uploadNewImage"/>
+        <ImageGridComponent
+          :album-detail="albumDetail"
+          :view-mode="viewMode"
+          @new-image-upload="uploadNewImage"
+        />
       </div>
       <URLCopyComponent />
       <CommentSectionComponent />

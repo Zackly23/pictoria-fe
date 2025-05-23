@@ -1,21 +1,37 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   previewModal: {
     type: Boolean,
     default: false,
   },
-  image: {
+  media: {
     type: Object,
     default: {},
   },
 })
 
-const emit = defineEmits(['closeModal'])
+const peviewMediaLoad = computed(() => {
+  if (props.media.type === 'image') {
+    return props.media.url
+  } else if (props.media.type === 'video') {
+    return props.media.url
+  }
+})
+
+const emits = defineEmits(['close-modal', 'previous-image', 'next-image'])
 
 const closeModal = () => {
-  emit('closeModal')
+  emits('close-modal')
+}
+
+const previousImage = () => {
+  emits('previous-image')
+}
+
+const nextImage = () => {
+  emits('next-image')
 }
 
 console.log('image preview is : ', props.image)
@@ -43,14 +59,65 @@ console.log('image preview is : ', props.image)
         </svg>
       </button>
 
-      <div>
+      <!-- Previous Preview arrow  -->
+      <div
+        class="absolute top-1/2 left-[-30px] transform -translate-y-1/2 rounded-full bg-gray-200 py-2"
+      >
+        <button @click="previousImage" class="text-gray-800 font-semibold py-2 px-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-6 h-6"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="">
         <div class="max-w-2xl mx-auto">
           <div class="bg-gray-100 rounded-lg p-4">
             <div class="rounded-lg overflow-hidden mb-4">
-              <img :src="props.image.url" class="w-full max-h-[350px]" alt="Image preview" />
+              <img
+                v-if="props.media.type === 'image'"
+                :src="props.media.url"
+                class="w-full max-h-[400px]"
+                alt="Image preview"
+              />
+
+              <video
+                v-else-if="props.media.type === 'video'"
+                :key="`${props.media.type}-${props.media.id}`"
+                controls
+                class="w-full max-h-[400px]"
+              >
+                <source :src="props.media.url" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Next Preview arrow  -->
+      <div
+        class="absolute top-1/2 right-[-30px] transform -translate-y-1/2 rounded-full bg-gray-200 py-2"
+      >
+        <button @click="nextImage" class="text-gray-800 font-semibold py-2 px-4 rounded-full">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-6 h-6"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5L15.75 12l-7.5 7.5" />
+          </svg>
+        </button>
       </div>
     </div>
   </section>

@@ -15,7 +15,7 @@ const props = defineProps({
   <!-- album Gallery - Grid View -->
   <section class="container mx-auto px-4 py-8" v-show="viewMode === 'grid'">
     <div
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
       v-show="albums?.length > 0"
     >
       <template v-for="album in albums" :key="album.id">
@@ -25,7 +25,7 @@ const props = defineProps({
               <img
                 :src="album.url"
                 :alt="album.name"
-                class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                class="w-full h-24 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div
                 class="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300"
@@ -51,9 +51,9 @@ const props = defineProps({
                   />
                 </svg>
               </div>
-              <h3 class="text-lg font-semibold mb-2" v-text="album.name"></h3>
+              <h3 class="text-md sm:text-lg font-semibold mb-2" v-text="album.name"></h3>
             </router-link>
-            <div class="flex flex-wrap gap-1 mb-3">
+            <div class="hidden sm:flex flex-wrap gap-1 mb-3">
               <div v-for="tag in album.tags" :key="tag">
                 <span
                   class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs"
@@ -105,7 +105,7 @@ const props = defineProps({
                 </div>
               </div>
 
-              <span v-text="album.date"></span>
+              <span class="hidden sm:block" v-text="album.date"></span>
             </div>
           </div>
         </div>

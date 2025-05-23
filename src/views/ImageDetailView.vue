@@ -16,12 +16,6 @@ const images = ref([
   },
 ])
 
-const filteredImages = computed(() => images.value)
-
-const openLightbox = (index) => {
-  console.log('Open lightbox for index', index)
-}
-
 const toggleLike = (index) => {
   images.value[index].likes++
 }
@@ -84,7 +78,7 @@ onMounted(() => {
                     <div class="flex items-center space-x-1">
                       <button
                         @click="() => toggleLike(index)"
-                        class="text-gray-500 hover:text-red-500 transition"
+                        class="text-gray-500 hover:text-red-500 transition cursor-pointer"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
