@@ -16,7 +16,7 @@ const changeActiveTab = (tab) => {
 <template>
   <section class="bg-white border-b border-gray-200 sticky top-16 z-30">
     <div class="container mx-auto px-4">
-      <div class="flex overflow-x-auto scrollbar-hide">
+      <div class="flex overflow-x-auto scrollbar justify-start">
         <button
           @click="changeActiveTab('albums')"
           :class="{ 'tab-active': props.activeTab === 'albums' }"
@@ -51,6 +51,14 @@ const changeActiveTab = (tab) => {
           class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap"
         >
           Subscription
+        </button>
+
+          <button
+          @click="changeActiveTab('followers')"
+          :class="{ 'tab-active': props.activeTab === 'followers' }"
+          class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap"
+        >
+          Followers
         </button>
       </div>
     </div>

@@ -1,9 +1,18 @@
 <script setup>
 import { ref } from 'vue'
-import PaginationComponent from '../AlbumsComponent/PaginationComponent.vue'
+import PaginationAlbumComponent from '../AlbumsComponent/PaginationAlbumComponent.vue'
+import DeleteAlbumModalComponent from './DeleteAlbumModalComponent.vue'
+import router from '@/router'
 
 const lastPageNumber = ref(10)
 const currentPageNumber = ref(1)
+const deleteAlbumModalOpen = ref(false)
+
+const deleteAlbum = () => {
+  // Logic to delete the album
+  console.log('Album deleted')
+  deleteAlbumModalOpen.value = false
+}
 
 const props = defineProps({
   viewMode: {
@@ -47,8 +56,8 @@ const changePaginationNumber = (number) => {
 
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-bold">My Albums</h2>
+    <div class="flex justify-end items-center mb-6">
+      <!-- <h2 class="text-xl font-bold">My Albums</h2> -->
 
       <div class="flex justify-center items-center space-x-2">
         <div
@@ -157,7 +166,8 @@ const changePaginationNumber = (number) => {
               </svg>
             </div>
           </div>
-          <button
+          <router-link
+            :to="{ name: 'profile', params: { userId: 123 }, query: { activeTab: 'upload' } }"
             class="bg-blue-500 text-white px-4 py-2 rounded font-medium hover:bg-blue-600 transition flex items-center"
           >
             <svg
@@ -173,7 +183,7 @@ const changePaginationNumber = (number) => {
               />
             </svg>
             New Album
-          </button>
+          </router-link>
         </div>
       </div>
     </div>
@@ -224,7 +234,10 @@ const changePaginationNumber = (number) => {
                   />
                 </svg>
               </router-link>
-              <button class="text-gray-500 hover:text-red-500 cursor-pointer">
+              <button
+                @click="deleteAlbumModalOpen = true"
+                class="text-gray-500 hover:text-red-500 cursor-pointer"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5"
@@ -248,15 +261,15 @@ const changePaginationNumber = (number) => {
 
     <!-- Pagination Section  -->
     <!-- Pagination  -->
-    <div class="flex justify-between items-center mt-2">
-      <div>
+    <div class="flex sm:justify-between justify-end items-center mt-2">
+      <div class="hidden sm:flex items-center">
         <p class="text-sm text-gray-700">
-          Showing <span class="font-medium">1</span> to <span class="font-medium">8</span> of
+          Showing <span class="font-medium">1</span> to <span class="font-medium">12</span> of
           <span class="font-medium">24</span> results
         </p>
       </div>
       <div class="flex items-end justify-end">
-        <PaginationComponent
+        <PaginationAlbumComponent
           :current-page-number="currentPageNumber"
           @change-pagination-number="changePaginationNumber"
           :last-page-number="lastPageNumber"
@@ -301,5 +314,18 @@ const changePaginationNumber = (number) => {
         </div>
       </div>
     </div>
+
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="deleteAlbumModalOpen"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <DeleteAlbumModalComponent
+          @close-modal="deleteAlbumModalOpen = false"
+          @delete-album="deleteAlbum"
+        />
+      </div>
+    </transition>
   </div>
 </template>

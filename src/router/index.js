@@ -7,6 +7,7 @@ import ImageDetailView from '@/views/ImageDetailView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import UploadSectionView from '@/views/UploadSectionView.vue'
 import AlbumsView from '@/views/AlbumsView.vue'
+import AlbumVideoTest from '@/views/AlbumVideoTest.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -57,6 +58,11 @@ const router = createRouter({
       name: 'signup',
       component: AuthView,
     },
+    {
+      path: '/album/test/:albumId',
+      name: 'test-album',
+      component: AlbumVideoTest
+    }
   ],
 })
 

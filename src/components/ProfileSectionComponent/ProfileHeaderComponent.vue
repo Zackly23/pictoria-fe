@@ -1,10 +1,26 @@
 <script setup>
+import { computed, ref } from 'vue'
 const props = defineProps({
   userProfile: {
     type: Object,
     required: true,
   },
 })
+
+const userHasFollow = ref(false)
+const previewUrl = ref(null)
+const initials = computed(() => props.userProfile.fullname.split(' ')[0]) // Ganti dengan nama pengguna dinamis jika perlu
+
+const uploadAvatar = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = () => {
+      previewUrl.value = reader.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
 </script>
 
 <template>
@@ -12,10 +28,48 @@ const props = defineProps({
   <section class="bg-white border-b border-gray-200">
     <div class="container mx-auto px-4 py-8">
       <div class="flex flex-col md:flex-row items-center md:items-start">
-        <div
-          class="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-4xl font-bold mb-4 md:mb-0 md:mr-6"
-        >
-          JD
+        <div class="relative w-32 h-32">
+          <!-- Klik area unggah -->
+          <label for="profilePicture" class="cursor-pointer">
+            <div
+              class="w-32 h-32 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center text-blue-500 text-4xl font-bold"
+            >
+              <img
+                v-if="previewUrl"
+                :src="previewUrl"
+                alt="Profile Picture"
+                class="object-cover w-full h-full"
+              />
+              <span v-else>{{ initials }}</span>
+            </div>
+
+            <!-- Ikon kamera -->
+            <div class="absolute top-0 left-2 bg-white rounded-full p-1 shadow-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
+                />
+              </svg>
+            </div>
+          </label>
+
+          <!-- Input file disembunyikan -->
+          <input
+            type="file"
+            id="profilePicture"
+            accept="image/*"
+            class="hidden"
+            @change="uploadAvatar"
+          />
         </div>
         <div class="text-center md:text-left flex-1">
           <div class="flex flex-col md:flex-row md:items-center mb-2">
@@ -55,15 +109,32 @@ const props = defineProps({
           </p>
           <div class="flex flex-wrap justify-center md:justify-start gap-4">
             <button
+           
+              @click="userHasFollow = !userHasFollow"
               class="bg-blue-500 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-600 transition"
             >
-              Follow
+              <span v-if="!userHasFollow">Follow</span>
+              <div v-else-if="userHasFollow" class="flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 mr-1"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.293-4.293a1 1 0 011.414 0l2.5 2.5a1 1 0 01-1.414 1.414l-2.5-2.5a1 1 0 010-1.414zM10 4a6 6 0 100 12A6 6 0 0010 4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Following</span>
+              </div>
             </button>
-            <button
+            <!-- <button
               class="border border-gray-300 text-gray-700 px-6 py-2 rounded-full font-medium hover:bg-gray-50 transition"
             >
               Message
-            </button>
+            </button> -->
             <a
               href="#"
               class="text-blue-500 hover:text-blue-700 px-6 py-2 font-medium flex items-center"

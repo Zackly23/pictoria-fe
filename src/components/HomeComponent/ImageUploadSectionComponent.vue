@@ -4,15 +4,23 @@ import { ref } from 'vue'
 const previewActive = ref(false)
 const fileName = ref('')
 const imageUrl = ref('') // ini untuk URL hasil upload
+const albumImageTempUrl = ref('') // ini untuk URL hasil upload
 const copied = ref(false)
 const uploadSuccess = ref(false)
 
 const handleFileChange = (event) => {
   const file = event.target.files[0]
   if (file) {
+    //create object for storing in backend
+    const formData = new FormData()
+    formData.append('file', file)
+    // get id of the file response from backend
+    const fileId = '12345' // replace with actual file ID from backend response
+
     fileName.value = file.name
     previewActive.value = true
-    imageUrl.value = URL.createObjectURL(file) // simulasikan URL preview
+    imageUrl.value = URL.createObjectURL(file)
+    albumImageTempUrl.value = `http://localhost:5173/image/${fileId}/temp`
     copied.value = false
   }
 }
@@ -27,7 +35,7 @@ const resetPreview = () => {
 
 const copyToClipboard = async () => {
   try {
-    await navigator.clipboard.writeText(imageUrl.value)
+    await navigator.clipboard.writeText(albumImageTempUrl.value)
     copied.value = true
     setTimeout(() => (copied.value = false), 2000)
   } catch (err) {
@@ -96,7 +104,7 @@ const copyToClipboard = async () => {
             <div v-if="uploadSuccess" class="flex items-center gap-2 mb-2 mt-4">
               <input
                 type="text"
-                :value="imageUrl"
+                :value="albumImageTempUrl"
                 class="w-full px-4 py-2 rounded border border-gray-300"
                 readonly
               />

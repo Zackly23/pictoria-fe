@@ -14,7 +14,7 @@ const props = defineProps({
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl md:text-4xl font-bold mb-2" v-text="props.currentCategory + ' Images'"></h1>
+          <h1 class="text-3xl md:text-4xl font-bold mb-2" v-text="`${props.currentCategory !== 'None' ? props.currentCategory : 'Search'}` + ' Images'"></h1>
           <p class="text-blue-100">
             Explore beautiful images in our
             <span>{{ props.currentCategory }}</span> collection
@@ -23,7 +23,8 @@ const props = defineProps({
         <button
           class="bg-white text-blue-500 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition"
         >
-          Upload to This Category
+          <span class="hidden sm:block">Upload to This Category</span>
+          <span class="block sm:hidden">Upload</span>
         </button>
       </div>
     </div>

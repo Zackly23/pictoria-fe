@@ -58,13 +58,16 @@ const storeNewAlbum = () => {
 function handleFileChange(e) {
   const inputFiles = Array.from(e.target.files)
   inputFiles.forEach((file, index) => {
+    const isImage = file.type.startsWith('image/')
     files.value.push({
       id: Date.now() + index,
       name: file.name,
+      type: isImage ? 'image' : 'video',
       size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
       url: URL.createObjectURL(file),
       raw: file,
       description: '', // Add a description field for each file
+      new: true,
     })
   })
 }
@@ -129,7 +132,7 @@ const filteredTargetEmails = computed(() =>
       ref="fileInput"
       type="file"
       multiple
-      accept="image/*"
+      accept="image/*, video/*"
       class="hidden"
       @change="handleFileChange"
     />
@@ -176,7 +179,14 @@ const filteredTargetEmails = computed(() =>
         :key="file.id"
         class="relative rounded-lg overflow-hidden bg-gray-100"
       >
-        <img :src="file.url" class="w-full h-40 object-cover" />
+        <img v-if="file.type === 'image'" :src="file.url" class="w-full h-40 object-cover" />
+        <video
+          v-else-if="file.type === 'video'"
+          :key="`${file.type}-${file.id}`"
+          controls
+          class="w-full h-40 object-cover"
+          :src="file.url"
+        ></video>
         <div
           class="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-200"
         >

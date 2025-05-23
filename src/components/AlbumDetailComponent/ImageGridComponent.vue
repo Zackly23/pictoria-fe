@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+
 import UploadModalComponent from '../UploadSectionComponent/UploadModalComponent.vue'
 import ImagePreviewZoomComponent from '../UploadSectionComponent/ImagePreviewZoomComponent.vue'
 
@@ -30,10 +31,30 @@ const toggleLike = (index) => {
 }
 
 const openPreviewImageModal = (imgId) => {
-  console.log('image id ', imgId)
-  previewModal.value = true
-  imagePreview.value = props.albumDetail.photos.find((img) => img.id === imgId)
-  console.log('preview image : ', imagePreview.value)
+  if (props.viewMode !== 1) {
+    console.log('image id ', imgId)
+    previewModal.value = true
+    imagePreview.value = props.albumDetail.medias.find((img) => img.id === imgId)
+    console.log('preview image : ', imagePreview.value)
+  }
+}
+
+const nextPreviewImageModal = () => {
+  const currentIndex = props.albumDetail.medias.findIndex((img) => img.id === imagePreview.value.id)
+  if (currentIndex === props.albumDetail.medias.length - 1) return
+  const nextIndex = (currentIndex + 1) % props.albumDetail.medias.length
+  imagePreview.value = props.albumDetail.medias[nextIndex]
+
+  console.log('next image : ', imagePreview.value)
+}
+
+const previousPreviewImageModal = () => {
+  const currentIndex = props.albumDetail.medias.findIndex((img) => img.id === imagePreview.value.id)
+  if (currentIndex === 0) return
+  const previousIndex = currentIndex - 1
+  imagePreview.value = props.albumDetail.medias[previousIndex]
+
+  console.log('previous image : ', imagePreview.value)
 }
 
 const uploadImage = (image) => {
@@ -43,6 +64,17 @@ const uploadImage = (image) => {
 }
 
 console.log('album detail : ', props.albumDetail)
+
+const closeDropdownOnClickOutside = (event) => {
+  // Check if the click is outside any dropdown or button
+  // console.log(isDropdownOpen("profile"));
+  if (
+    !event.target.closest("[data-dropdown-button]") &&
+    !event.target.closest("[data-dropdown-content]")
+  ) {
+    previewModal.value = false;
+  }
+};
 
 onMounted(() => {
   setTimeout(() => {
@@ -57,13 +89,30 @@ onMounted(() => {
     <div>
       <div v-if="props.viewMode === 1" class="grid grid-cols-1 gap-6 place-items-center">
         <div
-          v-for="(image, index) in props.albumDetail.photos"
+          v-for="(image, index) in props.albumDetail.medias"
           :key="image.id"
-          class="relative-div bg-white rounded-lg overflow-hidden shadow-sm w-[75%] aspect-[4/3]"
+          class="bg-white rounded-lg overflow-hidden shadow-sm w-full sm:w-[75%] aspect-[4/3]"
         >
-          <img :src="image.url" :alt="image.title" class="w-full h-full object-cover" />
-          <div class="absolute-div p-2 rounded-full shadow">
-            <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full shadow">
+          <!-- Kondisi jika media adalah gambar -->
+          <img
+            v-if="image.type === 'image'"
+            :src="image.url"
+            :alt="image.description"
+            class="w-full h-full"
+          />
+
+          <!-- Kondisi jika media adalah video -->
+          <video
+            v-else-if="image.type === 'video'"
+            :src="image.url"
+            class="w-full h-full"
+            controls
+            preload="metadata"
+            playsinline
+            controlsList="nodownload"
+          ></video>
+          <div class="p-2 rounded-full shadow">
+            <!-- <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full shadow">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-24 w-24 text-white"
@@ -78,7 +127,7 @@ onMounted(() => {
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
                 />
               </svg>
-            </button>
+            </button> -->
           </div>
           <div class="p-3">
             <div class="flex justify-between items-center">
@@ -121,11 +170,28 @@ onMounted(() => {
 
       <div v-if="props.viewMode === 3" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
-          v-for="(image, index) in props.albumDetail.photos"
+          v-for="(image, index) in props.albumDetail.medias"
           :key="image.id"
           class="relative-div bg-white rounded-lg overflow-hidden shadow-sm"
         >
-          <img :src="image.url" :alt="image.title" class="w-full h-48 object-cover" />
+          <!-- Kondisi jika media adalah gambar -->
+          <img
+            v-if="image.type === 'image'"
+            :src="image.url"
+            :alt="image.description"
+            class="w-full h-48 object-cover"
+          />
+
+          <!-- Kondisi jika media adalah video -->
+          <video
+            v-else-if="image.type === 'video'"
+            :src="image.url"
+            class="w-full h-48 object-cover"
+            controls
+            preload="metadata"
+            playsinline
+            controlsList="nodownload"
+          ></video>
           <div class="absolute-div p-2 rounded-full shadow">
             <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full">
               <svg
@@ -177,11 +243,28 @@ onMounted(() => {
 
       <div v-if="props.viewMode === 6" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <div
-          v-for="(image, index) in props.albumDetail.photos"
+          v-for="(image, index) in props.albumDetail.medias"
           :key="image.id"
           class="relative-div bg-white rounded-lg overflow-hidden shadow-sm"
         >
-          <img :src="image.url" :alt="image.title" class="w-full h-32 object-cover" />
+          <!-- Kondisi jika media adalah gambar -->
+          <img
+            v-if="image.type === 'image'"
+            :src="image.url"
+            :alt="image.description"
+            class="w-full h-32 object-cover"
+          />
+
+          <!-- Kondisi jika media adalah video -->
+          <video
+            v-else-if="image.type === 'video'"
+            :src="image.url"
+            class="w-full h-32 object-cover"
+            controls
+            preload="metadata"
+            playsinline
+            controlsList="nodownload"
+          ></video>
           <div class="absolute-div p-2 rounded-full shadow">
             <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full shadow">
               <svg
@@ -272,7 +355,9 @@ onMounted(() => {
         <ImagePreviewZoomComponent
           :open-modal="previewModal"
           @close-modal="previewModal = false"
-          :image="imagePreview"
+          @next-image="nextPreviewImageModal"
+          @previous-image="previousPreviewImageModal"
+          :media="imagePreview"
         />
       </div>
     </transition>

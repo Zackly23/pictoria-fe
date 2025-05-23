@@ -8,10 +8,10 @@ import CategoryPillComponent from '@/components/AlbumsComponent/CategoryPillComp
 
 const searchQuery = ref('')
 const viewMode = ref('grid')
-const currentCategory = ref('Nature')
+const currentCategory = ref('None')
 const sortOrder = ref('newest')
 const currentPageNumber = ref(1)
-const lastPageNumber = ref(20)
+const lastPageNumber = ref(24)
 const albums = ref([
   {
     id: 1,

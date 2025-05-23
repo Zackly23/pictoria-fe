@@ -1,27 +1,66 @@
 <script setup>
 import { ref } from 'vue'
 
+//dummy data
 const featuredImages = ref([
-  { src: 'bradford-zak-l2Z909j1vZE-unsplash.jpg' },
-  { src: 'muhammad-thoha-ma-ruf-0i93q-D5vYE-unsplash.jpg' },
-  { src: 'md-duran-RkeDATkBUfY-unsplash.jpg' },
-  { src: 'sumant-kumar-XQY7u9fu7WU-unsplash.jpg' },
-  { src: 'rainier-ridao-Gj6w4IasZY0-unsplash.jpg' },
-  { src: 'COVER.png' },
-  { src: 'zee.jpg' },
+  {
+    albumId: 1,
+    image: {
+      id: 1,
+      src: 'bradford-zak-l2Z909j1vZE-unsplash.jpg',
+      title: 'Nature',
+    },
+  },
+  {
+    albumId: 2,
+    image: {
+      id: 2,
+      src: 'muhammad-thoha-ma-ruf-0i93q-D5vYE-unsplash.jpg',
+      title: 'City',
+    },
+  },
+  {
+    albumId: 3,
+    image: {
+      id: 3,
+      src: 'md-duran-RkeDATkBUfY-unsplash.jpg',
+      title: 'Mountains',
+    },
+  },
+  {
+    albumId: 4,
+    image: {
+      id: 4,
+      src: 'sumant-kumar-XQY7u9fu7WU-unsplash.jpg',
+      title: 'Sunset',
+    },
+  },
+  {
+    albumId: 5,
+    image: {
+      id: 5,
+      src: 'rainier-ridao-Gj6w4IasZY0-unsplash.jpg',
+      title: 'Forest',
+    },
+  },
+  {
+    albumId: 6,
+    image: {
+      id: 6,
+      src: 'COVER.png',
+      title: 'Cover',
+    },
+  },
+  {
+    albumId: 7,
+    image: {
+      id: 7,
+      src: 'zee.jpg',
+      title: 'Ocean',
+    },
+  },
 ])
 
-const copiedIndexes = ref(new Set())
-
-const copyImageUrl = async (url, index) => {
-  try {
-    await navigator.clipboard.writeText(url)
-    copiedIndexes.value.add(index)
-    setTimeout(() => copiedIndexes.value.delete(index), 2000)
-  } catch (err) {
-    console.error('Failed to copy', err)
-  }
-}
 </script>
 
 <template>
@@ -37,7 +76,7 @@ const copyImageUrl = async (url, index) => {
         :class="{ 'md:col-span-2': index === 4 }"
       >
         <img
-          :src="`/src/assets/images/${img.src}`"
+          :src="`/src/assets/images/${img.image.src}`"
           alt="Featured image"
           class="w-full h-48 object-cover rounded mb-2"
         />
