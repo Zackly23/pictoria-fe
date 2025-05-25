@@ -1,9 +1,36 @@
 <script setup>
 // Tidak ada logic khusus
 import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import api from '@/api'
+
+const authStore = useAuthStore()
 
 const open = ref(false)
-const isLogin = ref(true)
+const isLogin = ref(JSON.parse(localStorage.getItem('user')) ? true : false)
+const userProfile = ref(JSON.parse(localStorage.getItem('user')))
+
+const signOut = async () => {
+  console.log('Signing out...')
+  try {
+    // Kirim permintaan logout ke server
+    const response = await api.post('/logout', {}, { skipAuthErrorHandler: true })
+
+    // Bersihkan data autentikasi dari localStorage
+    if (response.status === 200) {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
+
+      window.location.href = '/'
+    }
+
+    // Redirect ke halaman beranda
+    // window.location.href = '/';
+  } catch (error) {
+    console.error(error.response?.data || error.message)
+  }
+}
 </script>
 
 <template>
@@ -58,7 +85,7 @@ const isLogin = ref(true)
               <div
                 class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold"
               >
-                JD
+                {{ userProfile?.firstName ?? 'JD' }}
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -79,12 +106,20 @@ const isLogin = ref(true)
               class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
             >
               <router-link
-                :to="{ name: 'profile', params: { userId: 123 }, query: { activeTab: 'albums' } }"
+                :to="{
+                  name: 'profile',
+                  params: { userId: userProfile?.id ?? 1 },
+                  query: { activeTab: 'albums' },
+                }"
                 class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
                 >Profile</router-link
               >
               <router-link
-                :to="{ name: 'profile', params: { userId: 123 }, query: { activeTab: 'settings' } }"
+                :to="{
+                  name: 'profile',
+                  params: { userId: userProfile?.id ?? 1 },
+                  query: { activeTab: 'settings' },
+                }"
                 class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
                 >Settings</router-link
               >
@@ -94,14 +129,21 @@ const isLogin = ref(true)
                 >Pricing</router-link
               >
               <router-link
-                :to="{ name: 'profile', params: { userId: 123 }, query: { activeTab: 'albums' } }"
+                :to="{
+                  name: 'profile',
+                  params: { userId: userProfile?.id ?? 1 },
+                  query: { activeTab: 'albums' },
+                }"
                 class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
                 >My Albums</router-link
               >
               <hr class="my-1 border-gray-200" />
-              <router-link to="" class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
-                >Sign Out</router-link
+              <button
+                @click="signOut"
+                class="block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
               >
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
