@@ -1,17 +1,23 @@
 <script setup>
+import api from '@/api'
 import { computed, ref } from 'vue'
+
 const props = defineProps({
   userProfile: {
+    type: Object,
+    required: true,
+  },
+  userData: {
     type: Object,
     required: true,
   },
 })
 
 const userHasFollow = ref(false)
-const previewUrl = ref(null)
+const previewUrl = computed(() => props.userProfile?.avatar)
 const initials = computed(() => props.userProfile.fullname.split(' ')[0]) // Ganti dengan nama pengguna dinamis jika perlu
 
-const uploadAvatar = (event) => {
+const uploadAvatar = async (event) => {
   const file = event.target.files[0]
   if (file) {
     const reader = new FileReader()
@@ -20,14 +26,38 @@ const uploadAvatar = (event) => {
     }
     reader.readAsDataURL(file)
   }
+
+  console.log('file:', file)
+
+  try {
+    const formData = new FormData()
+    formData.append('profile_picture', file)
+
+    const response = await api.put(
+      `users/${props.userData.id}/profile/picture`,
+      formData, // <- wajib pakai FormData
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    )
+
+    console.log('response update profile: ', response)
+  } catch (error) {
+    console.error('error update profile: ', error)
+  }
 }
+
+console.log('user profile pic : ', props.userProfile)
+console.log('previewurl : ', previewUrl.value)
 </script>
 
 <template>
   <!-- Profile Header -->
   <section class="bg-white border-b border-gray-200">
     <div class="container mx-auto px-4 py-8">
-      <div class="flex flex-col md:flex-row items-center md:items-start">
+      <div class="flex flex-col md:flex-row items-center md:items-start space-x-3">
         <div class="relative w-32 h-32">
           <!-- Klik area unggah -->
           <label for="profilePicture" class="cursor-pointer">
@@ -35,8 +65,8 @@ const uploadAvatar = (event) => {
               class="w-32 h-32 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center text-blue-500 text-4xl font-bold"
             >
               <img
-                v-if="previewUrl"
-                :src="previewUrl"
+                v-if="props.userProfile?.avatar"
+                :src="props.userProfile?.avatar"
                 alt="Profile Picture"
                 class="object-cover w-full h-full"
               />
@@ -109,7 +139,6 @@ const uploadAvatar = (event) => {
           </p>
           <div class="flex flex-wrap justify-center md:justify-start gap-4">
             <button
-           
               @click="userHasFollow = !userHasFollow"
               class="bg-blue-500 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-600 transition"
             >
@@ -157,8 +186,8 @@ const uploadAvatar = (event) => {
           <div class="bg-blue-50 rounded-lg p-4 text-center">
             <div class="flex space-x-8 mb-2">
               <div>
-                <p class="text-2xl font-bold">{{ props.userProfile.stats.images }}</p>
-                <p class="text-gray-600 text-sm">Images</p>
+                <p class="text-2xl font-bold">{{ props.userProfile.stats.mediaCount }}</p>
+                <p class="text-gray-600 text-sm">Medias</p>
               </div>
               <div>
                 <p class="text-2xl font-bold">{{ props.userProfile.stats.followers }}</p>
@@ -173,9 +202,9 @@ const uploadAvatar = (event) => {
               <div class="flex justify-between items-center mb-2">
                 <span class="text-gray-600">Storage:</span>
                 <span class="font-medium"
-                  >{{ props.userProfile.stats.storageUsed }} /
-                  {{ props.userProfile.stats.storageTotal }}</span
-                >
+                  >{{ props.userProfile.stats.storageUsed }} GB /
+                  {{ props.userProfile.stats.storageTotal }} GB
+                </span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div

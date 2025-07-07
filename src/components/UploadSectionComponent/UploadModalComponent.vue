@@ -1,10 +1,15 @@
 <script setup>
+import api from '@/api'
 import { computed, ref, watch } from 'vue'
 
 const previewActive = ref(false)
-const file = ref(null)
+const file = ref({
+  raw: null,
+  type: '',
+})
 const fileName = ref('')
-const imageUrl = ref('')
+const mediaUrl = ref('')
+const mediaTypePrev = ref('')
 const uploadSuccess = ref(false)
 
 const props = defineProps({
@@ -12,54 +17,90 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  albumName: {
-    type: String,
-    default: 'Album Name',
+  albumDetail: {
+    type: Object,
   },
 })
 
-const imageDescription = ref(props.albumName)
+const mediaDescription = ref()
 
 // Optional: jika parent bisa mengubah props.albumName, sinkronkan ulang
-watch(
-  () => props.albumName,
-  (newVal) => {
-    imageDescription.value = newVal
-  }
-)
 
-const emit = defineEmits(['close-modal', 'upload-image'])
+const emits = defineEmits(['close-modal', 'upload-image'])
 
 const closeModal = () => {
-  emit('close-modal')
+  emits('close-modal')
   resetPreview()
 }
 
 const handleFileChange = (event) => {
-  file.value = event.target.files[0]
+  const media = event.target.files[0]
+  const isImage = media.type.startsWith('image/')
+
+  file.value.raw = media
+  file.value.type = isImage ? 'image' : 'video'
+
+  mediaTypePrev.value = isImage ? 'image' : 'video'
+
+  console.log('file new album : ', file.value)
+  console.log('description : ', mediaDescription.value)
+
   if (file.value) {
-    fileName.value = file.value.name
+    fileName.value = media.name
     previewActive.value = true
-    imageUrl.value = URL.createObjectURL(file.value) // simulasikan URL preview
+    mediaUrl.value = URL.createObjectURL(media) // simulasikan URL preview
   }
 }
 
 const resetPreview = () => {
   previewActive.value = false
   fileName.value = ''
-  imageUrl.value = ''
+  mediaUrl.value = ''
   uploadSuccess.value = false
+  mediaDescription.value = ''
 }
 
-const uploadImage = () => {
-  // Simulasi upload image
-  setTimeout(() => {
-    uploadSuccess.value = true
-    // Emit event to parent component if needed
-    console.log('Image uploaded:', file.value)
-    console.log('Image description:', imageDescription.value)
-    emit('upload-image', file.value)
-  }, 2000) // Simulasi delay 2 detik untuk upload
+const uploadMedia = async () => {
+  try {
+    console.log('file new album api : ', file.value)
+    console.log('description api: ', mediaDescription.value)
+
+    // Jika description kosong, fallback ke judul album
+    mediaDescription.value = mediaDescription.value ?? props.albumDetail.title
+
+    const formData = new FormData()
+
+    if (file.value.type === 'image') {
+      formData.append('album_images', file.value.raw)
+      formData.append('image_descriptions', mediaDescription.value)
+    } else {
+      formData.append('album_videos', file.value.raw)
+      formData.append('video_descriptions', mediaDescription.value)
+    }
+
+    for (let [key, value] of formData.entries()) {
+      console.log(key, ' : ', value)
+    }
+
+    const response = await api.post('/albums/media', formData, {
+      params: {
+        album_id: props.albumDetail.id,
+      },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    if (response.status == 200) {
+      console.log('eror ga????')
+      console.log('response simpan album media : ', response.data)
+      emits('upload-image')
+      resetPreview()
+    }
+  } catch (error) {
+    console.error('status errro ', error.status)
+    console.error('error simpan album media : ', error)
+  }
 }
 </script>
 
@@ -98,7 +139,7 @@ const uploadImage = () => {
             type="file"
             ref="fileInput"
             class="hidden"
-            accept="image/*"
+            accept="image/*,video/*"
             @change="handleFileChange"
           />
         </div>
@@ -125,10 +166,17 @@ const uploadImage = () => {
 
             <div class="rounded-lg overflow-hidden mb-4">
               <img
-                :src="imageUrl"
+                v-if="mediaTypePrev === 'image'"
+                :src="mediaUrl"
                 class="w-full max-h-[300px] object-contain"
                 alt="Image preview"
               />
+              <video
+                v-else-if="mediaTypePrev === 'video'"
+                controls
+                class="w-full h-40 object-cover"
+                :src="mediaUrl"
+              ></video>
             </div>
 
             <div class="block mt-4 space-y-2">
@@ -136,12 +184,12 @@ const uploadImage = () => {
                 type="text"
                 id="description"
                 name="description"
-                v-data="props.albumName"
-                v-model="imageDescription"
+                v-model="mediaDescription"
+                :placeholder="props.albumDetail.title"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
               />
               <button
-                @click="uploadImage"
+                @click="uploadMedia"
                 class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition w-full cursor-pointer"
               >
                 Upload Image

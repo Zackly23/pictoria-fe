@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 const tags = ref(['Beach', 'Mountain', 'City']) // contoh data, bisa disesuaikan
 const filterTag = ref('')
-const sortBy = ref('date')
+const sortBy = ref('recent')
 const sortOrder = ref('asc')
 
 const props = defineProps({
@@ -13,7 +13,7 @@ const props = defineProps({
   },
   sortBy: {
     type: String,
-    default: 'date',
+    default: 'recent',
   },
 
   sortOrder: {
@@ -68,7 +68,7 @@ const changeSortOrder = (sort) => {
         class="mr-2 px-3 py-1 border border-gray-300 rounded bg-white"
       >
         <option value="date">Date</option>
-        <option value="likes">Popularity</option>
+        <option value="popular">Popularity</option>
         <option value="title">Title</option>
       </select>
       <button @click="changeSortOrder(props.sortOrder)" class="p-1">

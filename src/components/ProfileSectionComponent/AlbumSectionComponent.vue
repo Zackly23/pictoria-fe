@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import PaginationAlbumComponent from '../AlbumsComponent/PaginationAlbumComponent.vue'
 import DeleteAlbumModalComponent from './DeleteAlbumModalComponent.vue'
 import router from '@/router'
 
-const lastPageNumber = ref(10)
+const lastPageNumber = computed(() => props.lastPage)
 const currentPageNumber = ref(1)
 const deleteAlbumModalOpen = ref(false)
 
@@ -31,9 +31,17 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  lastPage: {
+    type: Number,
+    required: true,
+  },
+  totalAlbum: {
+    type: Number,
+    required: true,
+  },
 })
 
-const emits = defineEmits(['change-view-mode', 'change-sort-by'])
+const emits = defineEmits(['change-view-mode', 'change-sort-by', 'change-page'])
 
 const changeViewMode = (mode) => {
   emits('change-view-mode', mode)
@@ -51,7 +59,12 @@ const changePaginationNumber = (number) => {
   }
   currentPageNumber.value = number
   console.log(number)
+
+  emits('change-page', number)
 }
+
+console.log('ada albums = ? ', props?.albums)
+console.log('ada file : ', props.albums.files)
 </script>
 
 <template>
@@ -150,7 +163,7 @@ const changePaginationNumber = (number) => {
             >
               <option value="recent">Most Recent</option>
               <option value="popular">Most Popular</option>
-              <option value="older">Oldest First</option>
+              <option value="oldest">Oldest First</option>
             </select>
             <div
               class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
@@ -212,7 +225,52 @@ const changePaginationNumber = (number) => {
             <router-link :to="`/album/${album.id}/details`">
               <h3 class="text-white text-xl font-bold">{{ album.title }}</h3>
             </router-link>
-            <p class="text-gray-200">{{ album.photoCount }} photos</p>
+            <!-- <p class="text-gray-200">{{ album.photoCount }} Media</p> -->
+            <div class="flex items-center space-x-2">
+              <div class="flex items-center space-x-2">
+                <span class="text-white">{{ album.imageCount }} </span>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
+                  />
+                </svg>
+              </div>
+
+              <div class="flex items-center space-x-1">
+                <span class="text-white">{{ album.videoCount }} </span>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"
+                  />
+                </svg>
+              </div>
+
+            </div>
           </div>
         </div>
         <div class="p-4">
@@ -222,7 +280,10 @@ const changePaginationNumber = (number) => {
           <div class="flex justify-between items-center">
             <span class="text-gray-500 text-sm">Updated {{ album.updatedAt }}</span>
             <div class="flex space-x-2">
-              <router-link :to="`/album/${1}/edit`" class="text-gray-500 hover:text-blue-500">
+              <router-link
+                :to="`/album/${album.id}/edit`"
+                class="text-gray-500 hover:text-blue-500"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5"
@@ -264,8 +325,9 @@ const changePaginationNumber = (number) => {
     <div class="flex sm:justify-between justify-end items-center mt-2">
       <div class="hidden sm:flex items-center">
         <p class="text-sm text-gray-700">
-          Showing <span class="font-medium">1</span> to <span class="font-medium">12</span> of
-          <span class="font-medium">24</span> results
+          Showing <span class="font-medium">1</span> to
+          <span class="font-medium">{{ props.albums?.length }}</span> of
+          <span class="font-medium">{{ props.totalAlbum }}</span> results
         </p>
       </div>
       <div class="flex items-end justify-end">

@@ -22,7 +22,7 @@ const router = createRouter({
         },
 
         {
-          path: '/album/:id/details',
+          path: '/album/:albumId/details',
           name: 'albumDetails',
           component: AlbumDetailView,
         },
@@ -32,7 +32,7 @@ const router = createRouter({
           component: ProfileView,
         },
         {
-          path: '/album/:id/edit',
+          path: '/album/:albumId/edit',
           name: 'album-edit',
           component: UploadSectionView,
         },

@@ -1,14 +1,33 @@
 <script setup>
 import { ref } from 'vue'
+import api from '@/api'
 
-const emits = defineEmits(['close-modal', 'verify-tfa'])
+const emits = defineEmits(['close-modal'])
 
 const closeModal = () => {
   emits('close-modal')
 }
 
-const verifyTFA = () => {
-  emits('verify-tfa')
+const deactivateConfirmation = ref('')
+
+const deactivateAccount = async () => {
+  try {
+    if (deactivateConfirmation.value === 'DEACTIVATE') {
+      const response = await api.post('/users/deactivate')
+
+      console.log('response deactivate: ', response.data)
+
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
+
+      window.location.href = '/'
+    } else {
+      return
+    }
+  } catch (error) {
+    console.error('error deactuvate : ', error)
+  }
 }
 </script>
 
@@ -121,6 +140,7 @@ const verifyTFA = () => {
               type="text"
               id="confirm"
               placeholder="DEACTIVATE"
+              v-model="deactivateConfirmation"
               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 shadow-sm"
               autofocus
             />

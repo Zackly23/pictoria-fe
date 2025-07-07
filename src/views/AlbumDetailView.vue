@@ -4,10 +4,14 @@ import FilterAndSortingComponent from '@/components/AlbumDetailComponent/FilterA
 import ImageGridComponent from '@/components/AlbumDetailComponent/ImageGridComponent.vue'
 import URLCopyComponent from '@/components/AlbumDetailComponent/URLCopyComponent.vue'
 import CommentSectionComponent from '@/components/AlbumDetailComponent/CommentSectionComponent.vue'
-import { ref } from 'vue'
-import video from '@/assets/video/Facebook Story_2.mp4'
-import video2 from '@/assets/video/Facebook Story.mp4'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import api from '@/api'
 
+const route = useRoute()
+const router = useRouter()
+const user = JSON.parse(localStorage.getItem('user'))
+const albumID = route.params.albumId
 const viewMode = ref(1) // 1 for grid view, 2 for list view
 const sortOrder = ref('asc')
 const sortBy = ref('date')
@@ -17,9 +21,15 @@ const albumDetail = ref({
   description:
     'A collection of beautiful summer memories captured during our vacation at the beach and mountains.',
   createdAt: '2025-06-29',
-  createdBy: 'John Photographer',
+  creator: {
+    creatorID: '',
+    createdBy: 'John Programming',
+  },
+  watcherHasLike: false,
   tags: ['Nature', 'Technology', 'Vacation', 'Bali'],
   likes: '1.2 k',
+  imageCount: 0,
+  videoCount: 0,
   medias: [
     {
       id: 1,
@@ -29,68 +39,82 @@ const albumDetail = ref({
       createdAt: '2025-06-29',
       createdBy: 'John Photographer',
       likes: 10,
+      watcherHasLike: false,
     },
-    {
-      id: 2,
-      type: 'image',
-      url: 'https://picsum.photos/200/300',
-      description: 'Hiking in the mountains.',
-      createdAt: '2025-06-29',
-      createdBy: 'John Photographer',
-      likes: 200,
-    },
-    {
-      id: 3,
-      type: 'image',
-      url: 'https://images.dog.ceo/breeds/puggle/IMG_075018.jpg',
-      description: 'A beautiful sunset at the beach.',
-      createdAt: '2025-06-29',
-      createdBy: 'John Photographer',
-      likes: 10,
-    },
-    {
-      id: 4,
-      type: 'image',
-      url: 'https://images.dog.ceo/breeds/schnauzer-giant/n02097130_1761.jpg',
-      description: 'A beautiful sunset at the beach.',
-      createdAt: '2025-06-29',
-      createdBy: 'John Photographer',
-      likes: 10,
-    },
+  ],
 
-    {
-      id: 5,
-      url: video,
-      type: 'video',
-      description: 'A beautiful woman.',
-      createdAt: '2025-06-29',
-      createdBy: 'John Photographer',
-      likes: 100,
-    },
-       {
-      id: 6,
-      url: video2,
-      type: 'video',
-      description: 'A beautiful woman.',
-      createdAt: '2025-06-29',
-      createdBy: 'John Photographer',
-      likes: 100,
-    },
-    // Add more photos as needed
-  ],
-  comments: [
-    {
-      id: 1,
-      text: 'Amazing album!',
-      createdAt: '2025-06-30',
-    },
-    {
-      id: 2,
-      text: 'Beautiful memories!',
-      createdAt: '2025-06-30',
-    },
-  ],
 })
+
+const albumBucket = ref([
+  {
+    id: 0,
+    index: 0,
+    type: '',
+    url: '',
+    description: '',
+    createdAt: '',
+    // createdBy: 'John Photographer',
+    likes: 0,
+  },
+])
+
+
+
+const getAlbumDetail = async () => {
+  try {
+    const response = await api.get(`/albums/${albumID}`, {
+      params: {
+        sort_by: sortBy.value,
+        order_by: sortOrder.value,
+      },
+    })
+
+    console.log('response : ', response.data)
+
+    const albumData = response.data.album
+    const medias = response.data.album_medias
+
+    albumDetail.value.id = albumData.album_id
+    albumDetail.value.title = albumData.title
+    albumDetail.value.description = albumData.description
+    albumDetail.value.tags = albumData.tags
+    albumDetail.value.likes = albumData.like_count
+    albumDetail.value.imageCount = albumData.image_count
+    albumDetail.value.videoCount = albumData.video_count
+    albumDetail.value.watcherHasLike = response.data.user_has_like
+    albumDetail.value.creator = {
+      creatorID: albumData.user_detail.user_id,
+      createdBy: albumData.user_detail.full_name,
+    }
+
+    const media = medias.map((file, idx) => {
+      return {
+        id: file.media_id,
+        index: idx,
+        url: file.url,
+        type: file.media_kind,
+        description: file.description,
+        createdAt: file.created_at,
+        watcherHasLike: file.user_has_like,
+        // createdBy: 'John Photographer',
+        likes: file.likes_count,
+      }
+    })
+
+    albumDetail.value.medias = media
+
+    albumBucket.value = media.map((file) => ({ ...file }))
+
+    console.log('album : ', albumDetail.value)
+    console.log('album bucker : ', albumBucket.value)
+  } catch (error) {
+    console.error('error get data : ', error)
+
+    if (error.status === 403) {
+      router.back()
+    }
+  }
+}
 
 //function
 const changeViewMode = (mode) => {
@@ -108,17 +132,59 @@ const changeSortOrder = (sort) => {
   sortOrder.value = sort
 }
 
-const uploadNewImage = (image) => {
-  console.log('New image uploaded:', image)
-  albumDetail.value.medias.push({
-    id: albumDetail.value.medias.length + 1,
-    url: image.url,
-    description: image.description,
-    createdAt: new Date().toISOString(),
-    createdBy: 'John Photographer',
-    likes: 0,
-  })
+const uploadNewImage = async () => {
+  await getAlbumDetail()
 }
+
+const clickLikeAlbum = async () => {
+  try {
+    console.log('data click : ', {
+      user_id: user.id,
+      album_id: albumDetail.value.id,
+    })
+    const response = await api.post('/albums/likes', {
+      user_id: user.id,
+      album_id: albumDetail.value.id,
+    })
+
+    if (response.status == 200) {
+      console.log('response like album : ', response.data)
+      getAlbumDetail()
+    }
+  } catch (error) {
+    console.error('response error like album : ', error)
+  }
+}
+
+const clickLikeMedia = async (mediaID, mediaType) => {
+  try {
+    console.log('data click : ', {
+      user_id: user.id,
+      media_id: mediaID,
+      media_type: mediaType,
+    })
+    const response = await api.post('/albums/media/likes', {
+      user_id: user.id,
+      media_id: mediaID,
+      media_type: mediaType,
+    })
+
+    if (response.status == 200) {
+      console.log('response like album : ', response.data)
+      getAlbumDetail()
+    }
+  } catch (error) {
+    console.error('response error like album : ', error)
+  }
+}
+
+watch([sortBy, sortOrder], () => {
+  getAlbumDetail()
+})
+
+onMounted(() => {
+  getAlbumDetail()
+})
 </script>
 
 <template>
@@ -128,6 +194,7 @@ const uploadNewImage = (image) => {
         <AlbumHeaderComponent
           :album-detail="albumDetail"
           @change-view-mode="changeViewMode"
+          @click-like-album="clickLikeAlbum"
           :view-mode="viewMode"
         />
 
@@ -143,6 +210,7 @@ const uploadNewImage = (image) => {
           :album-detail="albumDetail"
           :view-mode="viewMode"
           @new-image-upload="uploadNewImage"
+          @click-like-media="clickLikeMedia"
         />
       </div>
       <URLCopyComponent />

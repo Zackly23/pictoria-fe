@@ -1,6 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { v4 as uuidv4 } from 'uuid'
+import api from '@/api'
 
+const route = useRoute()
+const user = JSON.parse(localStorage.getItem('user'))
 const dragActive = ref(false)
 const uploadProgress = ref(0)
 const targetEmailInput = ref('')
@@ -8,7 +13,10 @@ const tagInput = ref('')
 const uploading = ref(false)
 const availableTags = ref(['Nature', 'Travel', 'Family', 'Friends', 'Work', 'Food'])
 // salin deskripsi awal
-const originalDescriptions = ref({})
+const originalDescriptions = ref([])
+
+const albumID = route.params.albumId
+
 const albums = ref({
   id: 1,
   title: 'Kabar Mentari',
@@ -26,6 +34,7 @@ const albums = ref({
       type: 'image',
       description: 'mama mia', // Add a description field for each file
       new: false,
+      status: '',
     },
     {
       id: 2,
@@ -36,9 +45,68 @@ const albums = ref({
       type: 'image',
       description: 'lezatos', // Add a description field for each file
       new: false,
+      status: '',
     },
   ],
 })
+const albumBucket = ref([
+  {
+    id: 0,
+    name: '',
+    size: '',
+    url: '',
+    raw: null,
+    type: '',
+    description: '', // Add a description field for each file
+    new: false,
+    status: '',
+  },
+])
+
+const getAlbumDetail = async () => {
+  try {
+    const response = await api.get(`/albums/${albumID}`)
+
+    console.log('response : ', response.data)
+    const albumDetail = response.data.album
+    const albumMedia = response.data.album_medias
+
+    albums.value.id = albumDetail.album_id
+    albums.value.title = albumDetail.title
+    albums.value.description = albumDetail.description
+    albums.value.privacy = albumDetail.album_privacy
+    albums.value.tags = albumDetail.tags
+    albums.value.targetEmails = albumDetail.target_email
+
+    const files = albumMedia.map((file) => {
+      return {
+        id: file.media_id,
+        name: file.description,
+        size: file.size,
+        url: file.url,
+        raw: null,
+        type: file.media_kind,
+        status: 'update',
+        description: file.description, // Add a description field for each file
+        new: false,
+      }
+    })
+
+    albums.value.files = files
+
+    albums.value.files.forEach((file) => {
+      originalDescriptions.value[file.id] = file.description
+    })
+
+    //temporal display
+    albumBucket.value = files.map((file) => ({ ...file }))
+
+    console.log('albums : ', albums.value)
+    console.log('abums bucket : ', albumBucket.value)
+  } catch (error) {
+    console.error('error ', error)
+  }
+}
 
 const resetForm = () => {
   console.log('reset')
@@ -49,22 +117,81 @@ const resetForm = () => {
 }
 
 // Simulasi upload
-const simulateUpload = () => {
-  uploading.value = true
+const simulateUpload = async () => {
+  try {
+    const formData = new FormData()
+    formData.append('user_id', user.id)
+    // Tags (tanpa index)
+    albums.value.tags.forEach((tag) => {
+      formData.append('tags', tag)
+    })
 
-  // Simulasi delay upload (contoh 2 detik)
-  setTimeout(() => {
-    storeNewAlbum()
-    alert('Upload berhasil!')
-    resetForm()
-    uploading.value = false
-  }, 2000)
-}
+    // Target Emails (tanpa index)
+    if (albums.value.privacy === 'restricted') {
+      albums.value.targetEmails.forEach((email) => {
+        formData.append('target_emails', email)
+      })
+    }
 
-const storeNewAlbum = () => {
-  // let status = 200
-  // Simulate storing the new album in a database or API
-  console.log('album edited : ', albums.value)
+    formData.append('title', albums.value.title)
+    formData.append('album_privacy', albums.value.privacy)
+    formData.append('description', albums.value.description)
+
+    albums.value.files.forEach((file) => {
+      if (file.new) {
+        if (file.type === 'image') {
+          formData.append('album_images', file.raw)
+          formData.append('album_image_ids', 'nil')
+          formData.append('image_descriptions', file.description)
+          formData.append('image_statuses', 'new')
+        } else {
+          formData.append('album_videos', file.raw)
+          formData.append('album_video_ids', 'nil')
+          formData.append('video_descriptions', file.description)
+          formData.append('video_statuses', 'new')
+        }
+      } else {
+        if (file.status === 'update') {
+          if (file.type === 'image') {
+            formData.append('album_image_ids', file.id)
+            formData.append('image_descriptions', file.description)
+            formData.append('image_statuses', 'update')
+          } else {
+            formData.append('album_video_ids', file.id)
+            formData.append('video_descriptions', file.description)
+            formData.append('video_statuses', 'update')
+          }
+        } else {
+          if (file.type === 'image') {
+            formData.append('album_image_ids', file.id)
+            formData.append('image_descriptions', file.description)
+            formData.append('image_statuses', 'delete')
+          } else {
+            formData.append('album_video_ids', file.id)
+            formData.append('video_descriptions', file.description)
+            formData.append('video_statuses', 'delete')
+          }
+        }
+      }
+    })
+
+    // Debug isi formData
+    for (let [key, value] of formData.entries()) {
+      console.log(key, ' : ', value)
+    }
+
+    // console.log('update album media des : ', albums.value.files)
+    // console.log('update album media bucket : ', albumBucket.value)
+    const response = await api.put(`/albums/${albumID}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    console.log('response update : ', response.data)
+  } catch (error) {
+    console.error('error update album : ', error)
+  }
 }
 
 const handleFileChange = (e) => {
@@ -72,8 +199,8 @@ const handleFileChange = (e) => {
   const inputFiles = Array.from(e.target.files)
   inputFiles.forEach((file, index) => {
     const isImage = file.type.startsWith('image/')
-    albums.value.files.push({
-      id: Date.now() + index,
+    const newFile = {
+      id: uuidv4(),
       name: file.name,
       type: isImage ? 'image' : 'video', // <--- ini penting!
       size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
@@ -81,10 +208,17 @@ const handleFileChange = (e) => {
       raw: file,
       description: '',
       new: true,
-    })
+      status: 'new',
+    }
 
-    console.log('file : ', file)
-    console.log('file url : ', URL.createObjectURL(file))
+    albumBucket.value.push(newFile)
+
+    albums.value.files.push(newFile)
+
+    // console.log('file : ', file)
+    // console.log('file url : ', URL.createObjectURL(file))
+
+    console.log('handle bucket album : ', albumBucket.value)
   })
 }
 
@@ -94,7 +228,24 @@ const handleDrop = (e) => {
 }
 
 const removeFile = (id) => {
-  albums.value.files = albums.value.files.filter((file) => file.id !== id)
+  const fileToUpdate = albums.value.files.find((file) => file.id === id)
+
+  if (!fileToUpdate) return
+
+  if (fileToUpdate.new) {
+    // Jika file baru, hapus dari albums.value.files
+    albums.value.files = albums.value.files.filter((file) => file.id !== id)
+  } else {
+    // Jika file lama, tandai status 'delete'
+    fileToUpdate.status = 'delete'
+  }
+
+  albumBucket.value = albumBucket.value.filter((file) => file.id !== id)
+  // Update tampilan bucket (hanya tampilkan file yang belum dihapus)
+  // albumBucket.value = albums.value.files.filter((file) => file.status !== 'delete')
+
+  console.log('delete albums : ', albums.value.files)
+  console.log('delete albums bucket : ', albumBucket.value)
 }
 
 function addTag() {
@@ -133,13 +284,32 @@ const filteredTargetEmails = computed(() =>
 
 const checkDescriptionChange = (file) => {
   const original = originalDescriptions.value[file.id]
-  file.new = file.description !== original
+  //update albums.files where file.id == file.id here
+  if (file.description !== original) {
+    const fileToUpdate = albums.value.files.find((item) => item.id === file.id)
+    const fileToUpdateBucket = albumBucket.value.find((item) => item.id === file.id)
+
+    if (fileToUpdate) {
+      // fileToUpdate.new = true
+      // fileToUpdate.raw = file.raw
+      fileToUpdate.name = file.description
+      fileToUpdate.description = file.description
+
+      fileToUpdateBucket.name = file.description
+      fileToUpdateBucket.description = file.description
+    }
+  }
+  console.log('raw : ', file)
+  console.log('update album media des : ', albums.value)
+  console.log('update album media bucket : ', albumBucket.value)
 }
 
 onMounted(() => {
-  albums.value.files.forEach((file) => {
-    originalDescriptions.value[file.id] = file.description
-  })
+  // albums.value.files.forEach((file) => {
+  //   originalDescriptions.value[file.id] = file.description
+  // })
+
+  getAlbumDetail()
 })
 </script>
 
@@ -199,11 +369,11 @@ onMounted(() => {
     </div>
 
     <!-- Selected Files -->
-    <div v-if="albums.files.length > 0">
-      <h3 class="text-lg font-medium mb-3">Selected Images ({{ albums?.files?.length }})</h3>
+    <div v-if="albumBucket?.length > 0">
+      <h3 class="text-lg font-medium mb-3">Selected Images ({{ albumBucket?.length }})</h3>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
         <div
-          v-for="file in albums?.files"
+          v-for="file in albumBucket"
           :key="file.id"
           class="relative rounded-lg overflow-hidden bg-gray-100"
         >
@@ -393,22 +563,6 @@ onMounted(() => {
 
       <div class="mb-4" v-if="albums.privacy === 'restricted'">
         <label class="block text-sm font-medium text-gray-700 mb-1">Target Email</label>
-
-        <div class="flex">
-          <input
-            v-model="targetEmailInput"
-            @keydown.enter.prevent="addTargetEmail"
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Add a email"
-          />
-          <button
-            @click="addTargetEmail"
-            class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600"
-          >
-            Add
-          </button>
-        </div>
-
         <div class="flex flex-wrap gap-2 mb-2">
           <span
             v-for="email in albums.targetEmails"
@@ -434,6 +588,20 @@ onMounted(() => {
               </svg>
             </button>
           </span>
+        </div>
+        <div class="flex">
+          <input
+            v-model="targetEmailInput"
+            @keydown.enter.prevent="addTargetEmail"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Add a email"
+          />
+          <button
+            @click="addTargetEmail"
+            class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600"
+          >
+            Add
+          </button>
         </div>
       </div>
 

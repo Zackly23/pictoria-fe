@@ -1,14 +1,33 @@
 <script setup>
 import { ref } from 'vue'
+import api from '@/api'
 
-const emits = defineEmits(['close-modal', 'verify-tfa'])
+const deleteConfirmation = ref('')
+
+const emits = defineEmits(['close-modal'])
 
 const closeModal = () => {
   emits('close-modal')
 }
 
-const verifyTFA = () => {
-  emits('verify-tfa')
+const deleteAccount = async () => {
+  try {
+    if (deleteConfirmation.value === 'DELETE') {
+      const response = await api.delete('/users/delete')
+
+      console.log('response deactivate: ', response.data)
+
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
+
+      window.location.href = '/'
+    } else {
+      return
+    }
+  } catch (error) {
+    console.error('error deactuvate : ', error)
+  }
 }
 </script>
 
@@ -119,13 +138,17 @@ const verifyTFA = () => {
 
           <!-- Confirmation Input -->
           <div class="mb-4">
-            <label for="confirm-delete-account" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="confirm-delete-account"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               To confirm, type <strong>"DELETE"</strong> below:
             </label>
             <input
               type="text"
               id="confirm-delete-account"
               placeholder="DELETE"
+              v-model="deleteConfirmation"
               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-600 focus:border-red-600 shadow-sm"
               autofocus
             />
