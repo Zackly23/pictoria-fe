@@ -1,19 +1,30 @@
 <script setup>
-import { ref } from 'vue'
+import api from '@/api'
+import QRCode from 'qrcode'
+import { onMounted, ref } from 'vue'
 import ResetPasswordModalComponent from './ResetPasswordModalComponent.vue'
 import TwoFactorAuthModalComponent from './TwoFactorAuthModalComponent.vue'
 import DeactivateAccountModalComponent from './DeactivateAccountModalComponent.vue'
 import DeleteAccountModalComponent from './DeleteAccountModalComponent.vue'
 
-const TFAEnabled = ref(false)
+const TFAEnabled = ref(true)
 const twoFactorModalOpen = ref(false)
 const resetPasswordModalOpen = ref(false)
 const deactivateAccountModalOpen = ref(false)
 const deleteAccountModalOpen = ref(false)
 const activeSettingTab = ref('profile')
 const selectedTags = ref(['Portrait', 'Nature', 'Travel', 'Architecture'])
+const totpSetup = ref({
+  secret: '',
+  QRurl: '',
+  QRbase64: null,
+})
 const props = defineProps({
   userProfile: {
+    type: Object,
+    required: true,
+  },
+  userConfiguration: {
     type: Object,
     required: true,
   },
@@ -39,10 +50,6 @@ const bio = ref(
 
 const newTag = ref('')
 
-const verifyTFAToggle = () => {
-  TFAEnabled.value = true
-}
-
 const removeTag = (tag) => {
   props.userProfile.tags = props.userProfile.tags.filter((t) => t !== tag)
 }
@@ -56,12 +63,17 @@ const addTag = () => {
 }
 
 const addPopularTag = (tag) => {
-  if (!props.userProfile.tags.includes(tag)) {
-    props.userProfile.tags.push(tag)
+  if (Array.isArray(props.userProfile.tags)) {
+    if (!props.userProfile.tags.includes(tag) || props.userProfile.tags.length < 1) {
+      props.userProfile.tags.push(tag)
+    }
+  } else {
+    console.error('tags should be an array')
   }
 }
 
 const changeCountry = (country) => {
+  props.userProfile.country = country
   console.log('Selected country:', country)
   // You can add logic here to handle country change if needed
 }
@@ -71,6 +83,39 @@ const newUserProfile = () => {
   emits('new-user-profile', newUserProfileValue)
   console.log('Updated User Profile:', props.userProfile)
 }
+
+const configureTFA = async () => {
+  try {
+    const response = await api.post('/auth/generate-totp')
+
+    console.log('response : ', response.data)
+
+    QRCode.toDataURL(response.data.otp_url)
+      .then((url) => {
+        // isi setup setelah QR berhasil digenerate
+        const setup = {
+          secret: response.data.secret,
+          QRurl: response.data.otp_url,
+          QRbase64: url,
+        }
+
+        totpSetup.value = setup
+        twoFactorModalOpen.value = true
+
+        console.log('totp : ', totpSetup.value)
+      })
+      .catch((err) => {
+        console.error('QR generation failed:', err)
+      })
+  } catch (error) {
+    console.error('error generating TOTP:', error)
+  }
+}
+
+onMounted(() => {
+  //initiate
+  TFAEnabled.value = props.userConfiguration.enableTFA
+})
 </script>
 
 <template>
@@ -489,23 +534,25 @@ const newUserProfile = () => {
             <div class="flex items-center">
               <span
                 class="text-sm font-medium mr-3"
-                :class="TFAEnabled ? 'text-green-600' : 'text-gray-400'"
+                :class="props.userConfiguration.enableTFA ? 'text-green-600' : 'text-gray-400'"
               >
-                {{ TFAEnabled ? 'Enabled' : 'Disabled' }}
+                {{ props.userConfiguration.enableTFA ? 'Enabled' : 'Disabled' }}
               </span>
               <button
                 :class="[
                   'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 transition-colors duration-200 ease-in-out',
-                  TFAEnabled ? 'bg-green-500 border-green-500' : 'bg-gray-300 border-gray-300',
+                  props.userConfiguration.enableTFA
+                    ? 'bg-green-500 border-green-500'
+                    : 'bg-gray-300 border-gray-300',
                 ]"
                 role="switch"
-                :aria-checked="TFAEnabled.toString()"
+                :aria-checked="props.userConfiguration.enableTFA.toString()"
               >
                 <span
                   aria-hidden="true"
                   :class="[
                     'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                    TFAEnabled ? 'translate-x-5' : 'translate-x-0',
+                    props.userConfiguration.enableTFA ? 'translate-x-5' : 'translate-x-0',
                   ]"
                 ></span>
               </button>
@@ -513,7 +560,8 @@ const newUserProfile = () => {
           </div>
           <div class="mt-4">
             <button
-              @click="() => (twoFactorModalOpen = true)"
+              v-if="!props.userConfiguration.enableTFA"
+              @click="configureTFA"
               type="button"
               class="cursor-pointer text-blue-600 hover:text-blue-500 text-sm font-medium"
             >
@@ -575,7 +623,7 @@ const newUserProfile = () => {
       >
         <TwoFactorAuthModalComponent
           @close-modal="twoFactorModalOpen = false"
-          @verify-tfa="verifyTFAToggle"
+          :totp-setup="totpSetup"
         />
       </div>
     </transition>
@@ -586,10 +634,7 @@ const newUserProfile = () => {
         class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
         role="dialog"
       >
-        <DeactivateAccountModalComponent
-          @close-modal="deactivateAccountModalOpen = false"
-          @verify-tfa="verifyTFAToggle"
-        />
+        <DeactivateAccountModalComponent @close-modal="deactivateAccountModalOpen = false" />
       </div>
     </transition>
 
@@ -599,10 +644,7 @@ const newUserProfile = () => {
         class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
         role="dialog"
       >
-        <DeleteAccountModalComponent
-          @close-modal="deleteAccountModalOpen = false"
-          @verify-tfa="verifyTFAToggle"
-        />
+        <DeleteAccountModalComponent @close-modal="deleteAccountModalOpen = false" />
       </div>
     </transition>
   </div>

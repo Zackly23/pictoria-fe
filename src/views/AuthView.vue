@@ -1,4 +1,5 @@
 <script setup>
+import ForgetPasswordModalComponent from '@/components/ForgetPasswordModalComponent.vue'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -27,6 +28,8 @@ const showCurrentPasswordConfirm = ref(false)
 const errorsLogin = ref()
 const errorsSignup = ref()
 
+const resetPasswordModalOpen = ref(false)
+
 const userLogin = async () => {
   // Logic for user login
   console.log('Logging in')
@@ -39,7 +42,7 @@ const userLogin = async () => {
     return
   }
 
-  const response = await api.post('/login', {
+  const response = await api.post('/auth/login', {
     email: emailLogin.value,
     password: passwordLogin.value,
   })
@@ -55,7 +58,6 @@ const userLogin = async () => {
 
     authStore.setUser(user)
     authStore.setToken(accessToken, refreshToken)
-
 
     if (localStorage.getItem('last_visited_page')) {
       router.push(localStorage.getItem('last_visited_page'))
@@ -95,7 +97,7 @@ const userSignup = async () => {
     confirmPassword.value,
   )
 
-  const response = await api.post('/signup', {
+  const response = await api.post('/auth/signup', {
     firstName: firstName.value,
     lastName: lastName.value,
     email: emailSignup.value,
@@ -260,11 +262,12 @@ const changeRoute = (newTab) => {
                       <label for="password-login" class="block text-gray-700 font-medium"
                         >Password</label
                       >
-                      <router-link
-                        to="/"
+                      <button
+                        @click="resetPasswordModalOpen = true"
                         class="cursor-pointer text-sm text-blue-500 hover:text-blue-700"
-                        >Forgot Password?</router-link
                       >
+                        Forgot Password?
+                      </button>
                     </div>
                     <div class="relative flex items-center">
                       <input
@@ -619,6 +622,18 @@ const changeRoute = (newTab) => {
       </div>
     </div>
   </main>
+
+  <div>
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="resetPasswordModalOpen"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <ForgetPasswordModalComponent @close-modal="resetPasswordModalOpen = false" />
+      </div>
+    </transition>
+  </div>
 </template>
 
 <style>

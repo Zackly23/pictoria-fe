@@ -20,30 +20,33 @@ const props = defineProps({
   },
 })
 
-const emits = defineEmits(['new-image-upload'])
+const emits = defineEmits(['new-image-upload', 'click-like-media', 'store-new-media'])
 
 const openLightbox = (index) => {
   console.log('Open lightbox for index', index)
 }
 
-const toggleLike = (index) => {
-  images.value[index].likes++
-}
+const toggleLike = (media) => {
+  const mediaLike = props.albumDetail.medias.find((file) => file.id === media.id)
 
-const openPreviewImageModal = (imgId) => {
+  emits('click-like-media', mediaLike.id, mediaLike.type)
+}
+const openPreviewImageModal = (imgIndex) => {
   if (props.viewMode !== 1) {
-    console.log('image id ', imgId)
+    console.log('image id ', imgIndex)
     previewModal.value = true
-    imagePreview.value = props.albumDetail.medias.find((img) => img.id === imgId)
+    imagePreview.value = props.albumDetail.medias.find((img) => img.index === imgIndex)
     console.log('preview image : ', imagePreview.value)
   }
 }
 
 const nextPreviewImageModal = () => {
-  const currentIndex = props.albumDetail.medias.findIndex((img) => img.id === imagePreview.value.id)
+  const currentIndex = props.albumDetail.medias.findIndex(
+    (img) => img.index === imagePreview.value.index,
+  )
   if (currentIndex === props.albumDetail.medias.length - 1) return
   const nextIndex = (currentIndex + 1) % props.albumDetail.medias.length
-  imagePreview.value = props.albumDetail.medias[nextIndex]
+  imagePreview.value = props.albumDetail.medias.find((file) => file.index === nextIndex)
 
   console.log('next image : ', imagePreview.value)
 }
@@ -69,12 +72,12 @@ const closeDropdownOnClickOutside = (event) => {
   // Check if the click is outside any dropdown or button
   // console.log(isDropdownOpen("profile"));
   if (
-    !event.target.closest("[data-dropdown-button]") &&
-    !event.target.closest("[data-dropdown-content]")
+    !event.target.closest('[data-dropdown-button]') &&
+    !event.target.closest('[data-dropdown-content]')
   ) {
-    previewModal.value = false;
+    previewModal.value = false
   }
-};
+}
 
 onMounted(() => {
   setTimeout(() => {
@@ -134,10 +137,27 @@ onMounted(() => {
               <h3 class="font-medium">{{ image.description }}</h3>
               <div class="flex items-center space-x-1">
                 <button
-                  @click="() => toggleLike(index)"
+                  @click="() => toggleLike(image)"
                   class="text-gray-500 hover:text-red-500 transition"
                 >
+                  <!-- has like  -->
                   <svg
+                    v-if="image.watcherHasLike"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-red-500"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M11.998 4.529c-2.5-2.403-6.57-2.054-8.77.693-1.87 2.356-1.573 5.81.716 7.898l7.275 7.036a.75.75 0 001.062 0l7.275-7.036c2.289-2.088 2.586-5.542.716-7.898-2.2-2.747-6.27-3.096-8.77-.693l-.252.242-.252-.242z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+
+                  <!-- netral  -->
+                  <svg
+                    v-else
                     xmlns="http://www.w3.org/2000/svg"
                     class="h-5 w-5"
                     fill="none"
@@ -193,7 +213,7 @@ onMounted(() => {
             controlsList="nodownload"
           ></video>
           <div class="absolute-div p-2 rounded-full shadow">
-            <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full">
+            <button @click="() => openPreviewImageModal(index)" class="p-2 rounded-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-16 w-16 text-white"
@@ -215,10 +235,27 @@ onMounted(() => {
               <h3 class="font-medium">{{ image.description }}</h3>
               <div class="flex items-center space-x-1">
                 <button
-                  @click="() => toggleLike(index)"
+                  @click="() => toggleLike(image)"
                   class="text-gray-500 hover:text-red-500 transition"
                 >
+                  <!-- has like  -->
                   <svg
+                    v-if="image.watcherHasLike"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-red-500"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M11.998 4.529c-2.5-2.403-6.57-2.054-8.77.693-1.87 2.356-1.573 5.81.716 7.898l7.275 7.036a.75.75 0 001.062 0l7.275-7.036c2.289-2.088 2.586-5.542.716-7.898-2.2-2.747-6.27-3.096-8.77-.693l-.252.242-.252-.242z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+
+                  <!-- netral  -->
+                  <svg
+                    v-else
                     xmlns="http://www.w3.org/2000/svg"
                     class="h-5 w-5"
                     fill="none"
@@ -337,8 +374,8 @@ onMounted(() => {
       role="dialog"
     >
       <UploadModalComponent
-        :upload-modal="uploadModal"
-        :album-name="props.albumDetail.title"
+        :uploadModal="uploadModal"
+        :albumDetail="props.albumDetail"
         @close-modal="uploadModal = false"
         @upload-image="uploadImage"
       />
@@ -353,7 +390,7 @@ onMounted(() => {
         role="dialog"
       >
         <ImagePreviewZoomComponent
-          :open-modal="previewModal"
+          :openModal="previewModal"
           @close-modal="previewModal = false"
           @next-image="nextPreviewImageModal"
           @previous-image="previousPreviewImageModal"

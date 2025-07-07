@@ -1,33 +1,95 @@
 <script setup>
-import { ref } from 'vue'
+import api from '@/api'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+const user = JSON.parse(localStorage.getItem('user'))
+const albumID = route.params.albumId
 
 const showComments = ref(false)
 const commentText = ref('')
-const comments = ref([
-  { id: 1, author: 'User 1', text: 'This is a comment.', date: '2025-04-26' },
-  { id: 2, author: 'User 2', text: 'Another comment.', date: '2025-04-26' }
-])
+const comments = ref([])
 
-function addComment() {
-  if (commentText.value.trim() !== '') {
-    comments.value.unshift({
-      id: Date.now(),
-      author: 'Anonymous',
-      text: commentText.value,
-      date: new Date().toLocaleDateString()
+const indexShowComment = ref(1)
+
+//return 4*indexShowComment record
+const filteredComments = computed(() => comments.value.slice(0, indexShowComment.value * 4))
+
+const showCommentSection = () => {
+  indexShowComment.value = showComments ? 1 : indexShowComment.value
+  showComments.value = !showComments.value
+}
+
+const addComment = async () => {
+  try {
+    console.log('send')
+    const response = await api.post('/albums/comments', {
+      album_id: albumID,
+      user_id: user.id,
+      comment: commentText.value,
     })
+
+    console.log('response post comment : ', response.data)
+    getAlbumComments()
+
     commentText.value = ''
+  } catch (error) {
+    console.error(error.status)
+    console.error('error get comment : ', error)
+  }
+  // if (commentText.value.trim() !== '') {
+  //   comments.value.unshift({
+  //     id: Date.now(),
+  //     author: 'Anonymous',
+  //     text: commentText.value,
+  //     date: new Date().toLocaleDateString(),
+  //   })
+  //   commentText.value = ''
+  // }
+}
+
+const getAlbumComments = async () => {
+  try {
+    const response = await api.get('/albums/comments', {
+      params: {
+        album_id: albumID,
+      },
+    })
+
+    if (response.status === 200) {
+      console.log('response get comment : ', response.data.comments)
+      const commentData = response.data.comments.map((comment) => {
+        return {
+          id: comment.id,
+          author: comment.user,
+          text: comment.comment,
+          date: comment.created_at,
+          avatar: comment.user_avatar,
+        }
+      })
+
+      comments.value = commentData
+      console.log('commen t : ', comments.value)
+      console.log('filtered : ', filteredComments.value)
+    }
+  } catch (error) {
+    console.error(error.status)
+    console.error('error get comment : ', error)
   }
 }
+
+onMounted(() => {
+  getAlbumComments()
+})
 </script>
 
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 mb-8">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold">
-        Comments ({{ comments.length }})
-      </h2>
-      <button @click="showComments = !showComments" class="text-blue-500 flex items-center">
+      <h2 class="text-lg font-semibold">Comments ({{ comments.length }})</h2>
+      <button @click="showCommentSection" class="text-blue-500 flex items-center">
         <span>{{ showComments ? 'Hide Comments' : 'Show Comments' }}</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +165,7 @@ function addComment() {
 
     <!-- Comments List -->
     <div v-show="showComments" class="space-y-4 divide-y divide-gray-200">
-      <div v-for="comment in comments" :key="comment.id" class="pt-4">
+      <div v-for="comment in filteredComments" :key="comment.id" class="pt-4">
         <div class="flex items-start space-x-3">
           <div class="bg-gray-200 text-gray-500 p-2 rounded-full">
             <svg
@@ -127,7 +189,8 @@ function addComment() {
                 <h3 class="font-medium">{{ comment.author }}</h3>
                 <p class="text-sm text-gray-500">{{ comment.date }}</p>
               </div>
-              <div class="flex">
+              <!-- Elipsis  -->
+              <!-- <div class="flex">
                 <button class="text-gray-400 hover:text-blue-500 p-1">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -144,10 +207,10 @@ function addComment() {
                     />
                   </svg>
                 </button>
-              </div>
+              </div> -->
             </div>
-            <p class="mt-2">{{ comment.text }}</p>
-            <div class="mt-2 flex items-center space-x-4 mb-2">
+            <p class="mt-2 mb-3">{{ comment.text }}</p>
+            <!-- <div class="mt-2 flex items-center space-x-4 mb-2">
               <button class="text-gray-500 hover:text-blue-500 text-sm flex items-center space-x-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +245,7 @@ function addComment() {
                 </svg>
                 <span>Reply</span>
               </button>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -211,8 +274,9 @@ function addComment() {
     </div>
 
     <!-- Load More Button -->
-    <div v-show="showComments && comments.length > 0" class="mt-6 text-center">
+    <div v-show="showComments && comments?.length > 0" class="mt-6 text-center">
       <button
+        @click="indexShowComment++"
         class="text-blue-500 px-4 py-2 border border-blue-500 rounded hover:bg-blue-50 transition"
       >
         Load More Comments

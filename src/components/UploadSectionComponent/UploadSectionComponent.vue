@@ -1,7 +1,15 @@
 <script setup>
+import api from '@/api'
+import router from '@/router'
 import { ref, computed } from 'vue'
 
 const emits = defineEmits(['new-store-album'])
+const props = defineProps({
+  userData: {
+    type: Object,
+    required: true,
+  },
+})
 
 const dragActive = ref(false)
 const files = ref([])
@@ -27,31 +35,59 @@ const resetForm = () => {
 }
 
 // Simulasi upload
-const simulateUpload = () => {
-  uploading.value = true
+const storeNewAlbum = async () => {
+  try {
+    const formData = new FormData()
 
-  // Simulasi delay upload (contoh 2 detik)
-  setTimeout(() => {
-    storeNewAlbum()
-    alert('Upload berhasil!')
-    resetForm()
-    uploading.value = false
-  }, 2000)
-}
+    // Title, Description, Privacy
+    formData.append('title', albumTitle.value)
+    formData.append('description', albumDescription.value)
+    formData.append('album_privacy', privacy.value)
 
-const storeNewAlbum = () => {
-  let status = 200
-  // Simulate storing the new album in a database or API
-  console.log('Storing new album...')
-  console.log('Title:', albumTitle.value)
-  console.log('Description:', albumDescription.value)
-  console.log('Files:', files.value)
-  console.log('Tags:', selectedTags.value)
-  console.log('Privacy:', privacy.value)
-  console.log('Target Emails:', selectedEmails.value)
+    // Tags (tanpa index)
+    selectedTags.value.forEach((tag) => {
+      formData.append('tags', tag)
+    })
 
-  if (status == 200) {
-    emits('new-store-album')
+    // Target Emails (tanpa index)
+    selectedEmails.value.forEach((email) => {
+      formData.append('target_emails', email)
+    })
+
+    // Files (image & video) — pakai index untuk deskripsi dan file
+    files.value.forEach((file) => {
+      if (file.type === 'image') {
+        formData.append(`album_images`, file.raw)
+        formData.append(`image_descriptions`, file.description || '')
+      } else if (file.type === 'video') {
+        formData.append(`album_videos`, file.raw)
+        formData.append(`video_descriptions`, file.description || '')
+      }
+    })
+
+    // Debug isi formData
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value)
+    }
+
+    // Kirim ke server
+    const response = await api.post('/albums', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    console.log('Upload sukses:', response.data)
+
+    if (response.status === 200) {
+      router.push({
+        name: 'profile',
+        params: { userId: props.userData.id },
+        query: { activeTab: 'albums' },
+      })
+    }
+  } catch (error) {
+    console.error('Upload gagal:', error)
   }
 }
 
@@ -422,7 +458,7 @@ const filteredTargetEmails = computed(() =>
       <button
         class="cursor-pointer px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="files.length === 0 || !albumTitle || uploading"
-        @click="simulateUpload"
+        @click="storeNewAlbum"
       >
         <span v-if="!uploading">Upload Album</span>
         <span v-else>Uploading...</span>

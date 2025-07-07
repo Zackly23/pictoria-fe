@@ -1,14 +1,43 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import api from '@/api'
 
-const emits = defineEmits(['close-modal', 'verify-tfa'])
+const inputCode = ref({
+  input1: null,
+  input2: null,
+  input3: null,
+  input4: null,
+  input5: null,
+  input6: null,
+})
+const emits = defineEmits(['close-modal'])
+const props = defineProps({
+  totpSetup: {
+    type: Object,
+    required: true,
+  },
+})
 
 const closeModal = () => {
   emits('close-modal')
 }
 
-const verifyTFA = () => {
-  emits('verify-tfa')
+const verifyTFA = async () => {
+  try {
+    console.log('inputCode : ', inputCode.value)
+    // merge inputCode into 1 string
+    const code = Object.values(inputCode.value).join('')
+    console.log('Merged code: ', code)
+
+    const response = await api.post('/auth/verify-totp', {
+      code: code,
+    })
+
+    console.log('response : ', response.data)
+    // emits('close-modal')
+  } catch (error) {
+    console.error('errror : ', error)
+  }
 }
 </script>
 
@@ -46,7 +75,7 @@ const verifyTFA = () => {
                     class="bg-white p-2 border border-gray-200 rounded-md shadow-sm mx-auto w-44 h-44 flex items-center justify-center"
                   >
                     <!-- Replace with actual QR code -->
-                    <img src="" alt="QR Code" class="w-full h-full" />
+                    <img :src="props.totpSetup.QRbase64" alt="QR Code" class="w-full h-full" />
                   </div>
                 </div>
                 <p class="mt-2 text-xs text-gray-600 text-center max-w-xs">
@@ -66,32 +95,38 @@ const verifyTFA = () => {
                     <input
                       type="text"
                       maxlength="1"
+                      v-model="inputCode.input1"
                       class="sm:w-12 sm:h-12 w-10 h-10 text-center text-base font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                       autofocus
                     />
                     <input
                       type="text"
                       maxlength="1"
+                      v-model="inputCode.input2"
                       class="sm:w-12 sm:h-12 w-10 h-10 text-center text-base font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
                     <input
                       type="text"
                       maxlength="1"
+                      v-model="inputCode.input3"
                       class="sm:w-12 sm:h-12 w-10 h-10 text-center text-base font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
                     <input
                       type="text"
                       maxlength="1"
+                      v-model="inputCode.input4"
                       class="sm:w-12 sm:h-12 w-10 h-10 text-center text-base font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
                     <input
                       type="text"
                       maxlength="1"
+                      v-model="inputCode.input5"
                       class="sm:w-12 sm:h-12 w-10 h-10 text-center text-base font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
                     <input
                       type="text"
                       maxlength="1"
+                      v-model="inputCode.input6"
                       class="sm:w-12 sm:h-12 w-10 h-10 text-center text-base font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                     />
                   </div>

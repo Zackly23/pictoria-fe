@@ -12,12 +12,16 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['change-view-mode'])
+const emits = defineEmits(['change-view-mode', 'click-like-album'])
 
 const changeViewMode = (mode) => {
-  emit('change-view-mode', mode)
+  emits('change-view-mode', mode)
 
   console.log('view mode now:', props.viewMode)
+}
+
+const clickLikeAlbum = () => {
+  emits('click-like-album')
 }
 </script>
 
@@ -69,12 +73,12 @@ const changeViewMode = (mode) => {
               />
             </svg>
 
-            <span class="text-gray-600">{{ props.albumDetail.createdBy }}</span>
+            <span class="text-gray-600">{{ props.albumDetail.creator.createdBy }}</span>
           </div>
           <!-- <span class="mx-2 text-gray-400">•</span> -->
           <div class="flex items-center space-x-2">
             <div class="flex items-center space-x-2">
-              <span class="text-gray-600">{{ props.albumDetail.medias.length }} </span>
+              <span class="text-gray-600">{{ props.albumDetail.imageCount }} </span>
 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -98,7 +102,7 @@ const changeViewMode = (mode) => {
             </div>
 
             <div class="flex items-center space-x-1">
-              <span class="text-gray-600">{{ props.albumDetail.medias.length }} </span>
+              <span class="text-gray-600">{{ props.albumDetail.videoCount }} </span>
 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -119,11 +123,9 @@ const changeViewMode = (mode) => {
             <div class="flex items-center space-x-1">
               <span>{{ props.albumDetail.likes }}</span>
 
-              <button
-                @click="() => toggleLikeAll(props.albumDetail.id)"
-                class="text-gray-500 hover:text-red-500 transition"
-              >
+              <button @click="clickLikeAlbum" class="text-gray-500 hover:text-red-500 transition">
                 <svg
+                  v-if="!props.albumDetail.watcherHasLike"
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5"
                   fill="none"
@@ -135,6 +137,20 @@ const changeViewMode = (mode) => {
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 text-red-500"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M11.998 4.529c-2.5-2.403-6.57-2.054-8.77.693-1.87 2.356-1.573 5.81.716 7.898l7.275 7.036a.75.75 0 001.062 0l7.275-7.036c2.289-2.088 2.586-5.542.716-7.898-2.2-2.747-6.27-3.096-8.77-.693l-.252.242-.252-.242z"
+                    clip-rule="evenodd"
                   />
                 </svg>
               </button>
