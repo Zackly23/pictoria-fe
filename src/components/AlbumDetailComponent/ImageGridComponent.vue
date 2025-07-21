@@ -1,13 +1,16 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
+import AddTargetEmailModalComponent from './AddTargetEmailModalComponent.vue'
 import UploadModalComponent from '../UploadSectionComponent/UploadModalComponent.vue'
 import ImagePreviewZoomComponent from '../UploadSectionComponent/ImagePreviewZoomComponent.vue'
 
+const user = JSON.parse(localStorage.getItem('user'))
 const isLoading = ref(true)
 const uploadModal = ref(false)
 const previewModal = ref(false)
 const imagePreview = ref()
+const openAddEmailModal = ref(false)
 
 const props = defineProps({
   albumDetail: {
@@ -20,7 +23,7 @@ const props = defineProps({
   },
 })
 
-const emits = defineEmits(['new-image-upload', 'click-like-media', 'store-new-media'])
+const emits = defineEmits(['new-image-upload', 'click-like-media'])
 
 const openLightbox = (index) => {
   console.log('Open lightbox for index', index)
@@ -66,6 +69,7 @@ const uploadImage = (image) => {
   uploadModal.value = false
 }
 
+console.log('is this user own ? ', props.isAlbumUserOwn)
 console.log('album detail : ', props.albumDetail)
 
 const closeDropdownOnClickOutside = (event) => {
@@ -77,6 +81,11 @@ const closeDropdownOnClickOutside = (event) => {
   ) {
     previewModal.value = false
   }
+}
+
+const updateTargetEmail = () => {
+  openAddEmailModal.value = false
+  emits('new-image-upload')
 }
 
 onMounted(() => {
@@ -94,7 +103,7 @@ onMounted(() => {
         <div
           v-for="(image, index) in props.albumDetail.medias"
           :key="image.id"
-          class="bg-white rounded-lg overflow-hidden shadow-sm w-full sm:w-[75%] aspect-[4/3]"
+          class="bg-white rounded-lg overflow-hidden shadow-sm w-full sm:w-[75%] "
         >
           <!-- Kondisi jika media adalah gambar -->
           <img
@@ -303,7 +312,7 @@ onMounted(() => {
             controlsList="nodownload"
           ></video>
           <div class="absolute-div p-2 rounded-full shadow">
-            <button @click="() => openPreviewImageModal(index + 1)" class="p-2 rounded-full shadow">
+            <button @click="() => openPreviewImageModal(index)" class="p-2 rounded-full shadow">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5 text-white"
@@ -329,7 +338,7 @@ onMounted(() => {
   </div>
 
   <!-- Add Image Button -->
-  <div class="flex justify-center">
+  <div v-show="props.albumDetail.creator.isAlbumUserOwn" class="flex justify-center">
     <button
       @click="uploadModal = true"
       class="bg-white border-2 border-dashed border-gray-300 rounded-full p-3 hover:bg-gray-50 transition focus:outline-none cursor-pointer"
@@ -348,7 +357,43 @@ onMounted(() => {
 
   <!-- Sharing Section -->
   <div class="flex justify-between items-center mb-6">
-    <h2 class="text-lg font-semibold">Share to</h2>
+    <div class="flex-col space-y-2">
+      <button
+        v-show="
+          props.albumDetail.creator.isAlbumUserOwn &&
+          props.albumDetail.albumPrivacy === 'restricted'
+        "
+        @click="openAddEmailModal = true"
+        class="flex items-center space-x-2 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 shadow-sm hover:shadow-md"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M16 12H8m4-4v8m7.5-4a9.5 9.5 0 11-19 0 9.5 9.5 0 0119 0z"
+          />
+        </svg>
+        <span>Tambah Email</span>
+      </button>
+
+      <!-- <div class="flex items-center space-x-1">
+        <img
+          v-for="(user, idx) in props.albumDetail.targetEmails || []"
+          :key="user.id"
+          :src="user.avatarUrl"
+          :alt="user.name"
+          class="w-6 h-6 rounded-full border-2 border-white shadow object-cover"
+          :style="{ zIndex: 10 - idx }"
+        />
+      </div> -->
+    </div>
     <div class="flex items-center space-x-2">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -363,7 +408,7 @@ onMounted(() => {
           clip-rule="evenodd"
         />
       </svg>
-      <span class="font-medium">1.2k</span>
+      <span class="font-medium">{{ props.albumDetail.viewCount }}</span>
     </div>
   </div>
 
@@ -395,6 +440,23 @@ onMounted(() => {
           @next-image="nextPreviewImageModal"
           @previous-image="previousPreviewImageModal"
           :media="imagePreview"
+        />
+      </div>
+    </transition>
+  </div>
+
+  <div>
+    <transition name="fade-zoom" appear>
+      <div
+        v-show="openAddEmailModal"
+        class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+        role="dialog"
+      >
+        <AddTargetEmailModalComponent
+          :openModal="openAddEmailModal"
+          :album-detail="props.albumDetail"
+          @close-modal="openAddEmailModal = false"
+          @update-target-email="updateTargetEmail"
         />
       </div>
     </transition>

@@ -1,16 +1,38 @@
 <script setup>
+import api from '@/api'
 import { ref } from 'vue'
 
-const emits = defineEmits(['close-modal', 'delete-album'])
+const deleteAlbumConfirmation = ref('')
+const emits = defineEmits(['close-modal', 'delete-album-handler'])
 
 const closeModal = () => {
   emits('close-modal')
 }
 
-const deleteAlbum = () => {
-  emits('delete-album')
-}
+const props = defineProps({
+  albumId: {
+    type: String,
+    required: true,
+  },
+})
 
+const deleteAlbum = async () => {
+  try {
+    if (deleteAlbumConfirmation.value === 'DELETE') {
+      console.log('ini bener ga sih album id nya => ', props.albumId)
+      const response = await api.delete(`/albums/${props.albumId}`)
+
+      if (response.status === 200) {
+        console.log('response delete : ', response.data)
+        emits('delete-album-handler')
+      }
+    } else {
+      return
+    }
+  } catch (error) {
+    console.error('error delete : ', error)
+  }
+}
 </script>
 
 <template>
@@ -76,9 +98,7 @@ const deleteAlbum = () => {
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span
-                  >Your image, video, and all associated data will be permanently deleted</span
-                >
+                <span>Your image, video, and all associated data will be permanently deleted</span>
               </li>
               <li class="flex items-start">
                 <svg
@@ -94,7 +114,8 @@ const deleteAlbum = () => {
                   />
                 </svg>
                 <span
-                  >This action is irreversible. You will not be able to recover your Albums in this platform</span
+                  >This action is irreversible. You will not be able to recover your Albums in this
+                  platform</span
                 >
               </li>
               <li class="flex items-start">
@@ -127,12 +148,11 @@ const deleteAlbum = () => {
               type="text"
               id="confirm-delete-album"
               placeholder="DELETE"
+              v-model="deleteAlbumConfirmation"
               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-600 focus:border-red-600 shadow-sm"
               autofocus
             />
           </div>
-
-        
         </div>
 
         <!-- Footer Actions -->

@@ -4,6 +4,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  isUserHasSameId: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 console.log('stats: ', props.userProfile.stats)
@@ -11,7 +15,7 @@ console.log('stats: ', props.userProfile.stats)
 
 <template>
   <!-- Profile Stats (Mobile) -->
-  <section class="md:hidden bg-blue-50 border-b border-gray-200">
+  <section v-if="props.isUserHasSameId" class="md:hidden bg-blue-50 border-b border-gray-200">
     <div class="container mx-auto px-4 py-4">
       <div class="flex justify-between mb-4">
         <div class="text-center">
@@ -31,9 +35,8 @@ console.log('stats: ', props.userProfile.stats)
         <div class="flex justify-between items-center mb-2">
           <span class="text-gray-600">Storage:</span>
           <span class="font-medium"
-            >{{ props.userProfile.stats.storageUsed }} GB /
-            {{ props.userProfile.stats.storageTotal }} GB</span
-          >
+            >{{ props.userProfile.stats.storageUsed }} / {{ props.userProfile.stats.storageTotal }}
+          </span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2">
           <div

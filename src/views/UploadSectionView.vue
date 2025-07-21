@@ -1,9 +1,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { v4 as uuidv4 } from 'uuid'
+import { validateAlbumUpload } from '@/validations/AlbumValidation'
 import api from '@/api'
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
+const errorsAlbumUpload = ref()
+const router = useRouter()
 const route = useRoute()
 const user = JSON.parse(localStorage.getItem('user'))
 const dragActive = ref(false)
@@ -117,8 +122,30 @@ const resetForm = () => {
 }
 
 // Simulasi upload
-const simulateUpload = async () => {
+const updateAlbum = async () => {
   try {
+    const { isValid, errors } = validateAlbumUpload(
+      albums.value.files,
+      albums.value.title,
+      albums.value.description,
+      albums.value.tags,
+      albums.value.privacy,
+      albums.value.targetEmails,
+    )
+
+    if (!isValid) {
+      errorsAlbumUpload.value = errors
+
+      toast.add({
+        severity: 'warn',
+        summary: 'Validasi Gagal',
+        detail: 'Mohon isi data album dengan benar.',
+        life: 3000,
+      })
+
+      return
+    }
+
     const formData = new FormData()
     formData.append('user_id', user.id)
     // Tags (tanpa index)
@@ -188,9 +215,44 @@ const simulateUpload = async () => {
       },
     })
 
-    console.log('response update : ', response.data)
+    if (response.status === 202) {
+      toast.add({
+        severity: 'success',
+        summary: 'Album Diperbarui',
+        detail: 'Album berhasil diperbarui.',
+        life: 3000,
+      })
+      console.log('response update : ', response.data)
+
+      router.push(`/profile/${user.id}`)
+    }
   } catch (error) {
     console.error('error update album : ', error)
+    if (error.response && error.response.status === 413) {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Gagal',
+        detail: 'Ukuran file terlalu besar. Maksimal 10MB per file.',
+        life: 3000,
+      })
+      return
+    } else if (error.response && error.response.status === 451) {
+      // Handle validation errors
+      toast.add({
+        severity: 'warn',
+        summary: 'Kapasitas Penuh',
+        detail:
+          'Kapasitas album sudah penuh. Silakan hapus beberapa file sebelum mengunggah yang baru.',
+        life: 3000,
+      })
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Gagal',
+        detail: 'Kesalahan Menyimpan Album.',
+        life: 3000,
+      })
+    }
   }
 }
 
@@ -483,6 +545,9 @@ onMounted(() => {
             v-model="tagInput"
             @keydown.enter.prevent="addTag"
             class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            :class="{
+              'border-red-500': errorsAlbumUpload?.tag,
+            }"
             placeholder="Add a tag"
           />
           <button
@@ -492,6 +557,10 @@ onMounted(() => {
             Add
           </button>
         </div>
+
+        <p v-if="errorsAlbumUpload?.tag" class="text-red-500 text-sm mt-1">
+          {{ errorsAlbumUpload?.tag }}
+        </p>
 
         <div class="mt-2">
           <p class="text-sm text-gray-600 mb-1">Suggested tags:</p>
@@ -594,6 +663,9 @@ onMounted(() => {
             v-model="targetEmailInput"
             @keydown.enter.prevent="addTargetEmail"
             class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            :class="{
+              'border-red-500': errorsAlbumUpload?.targetEmail,
+            }"
             placeholder="Add a email"
           />
           <button
@@ -603,6 +675,9 @@ onMounted(() => {
             Add
           </button>
         </div>
+        <p v-if="errorsAlbumUpload?.targetEmail" class="text-red-500 text-sm mt-1">
+          {{ errorsAlbumUpload?.targetEmail }}
+        </p>
       </div>
 
       <!-- Action Buttons -->
@@ -619,7 +694,7 @@ onMounted(() => {
         <button
           class="cursor-pointer px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="albums.files.length === 0 || !albums.title || uploading"
-          @click="simulateUpload"
+          @click="updateAlbum"
         >
           <span v-if="!uploading">Upload Album</span>
           <span v-else>Uploading...</span>

@@ -1,6 +1,6 @@
 <script setup>
-import video from '@/assets/video/Facebook Story_2.mp4'
-import video2 from '@/assets/video/Facebook Story.mp4'
+// import video from '@/assets/video/Facebook Story_2.mp4'
+// import video2 from '@/assets/video/Facebook Story.mp4'
 
 const videoList = [
   {

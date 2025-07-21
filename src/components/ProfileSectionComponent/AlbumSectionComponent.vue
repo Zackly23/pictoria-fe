@@ -7,14 +7,13 @@ import router from '@/router'
 const lastPageNumber = computed(() => props.lastPage)
 const currentPageNumber = ref(1)
 const deleteAlbumModalOpen = ref(false)
-
-const deleteAlbum = () => {
-  // Logic to delete the album
-  console.log('Album deleted')
-  deleteAlbumModalOpen.value = false
-}
+const albumIdSelected = ref('')
 
 const props = defineProps({
+  isUserHasSameId: {
+    type: Boolean,
+    default: false,
+  },
   viewMode: {
     type: String,
     default: 'grid',
@@ -26,6 +25,10 @@ const props = defineProps({
   albums: {
     type: Array,
     default: () => [],
+  },
+  userId: {
+    type: String,
+    required: true,
   },
   recentPhotos: {
     type: Array,
@@ -41,7 +44,25 @@ const props = defineProps({
   },
 })
 
-const emits = defineEmits(['change-view-mode', 'change-sort-by', 'change-page'])
+const emits = defineEmits([
+  'change-view-mode',
+  'change-sort-by',
+  'change-page',
+  'delete-album-handler',
+])
+
+const deleteAlbum = (album) => {
+  console.log('albumID : ', album)
+  albumIdSelected.value = album.id
+  deleteAlbumModalOpen.value = true
+}
+
+const deleteAlbumHandler = () => {
+  // Logic to delete the album
+  console.log('Album deleted')
+  deleteAlbumModalOpen.value = false
+  emits('delete-album-handler')
+}
 
 const changeViewMode = (mode) => {
   emits('change-view-mode', mode)
@@ -180,7 +201,12 @@ console.log('ada file : ', props.albums.files)
             </div>
           </div>
           <router-link
-            :to="{ name: 'profile', params: { userId: 123 }, query: { activeTab: 'upload' } }"
+            v-if="isUserHasSameId"
+            :to="{
+              name: 'profile',
+              params: { userId: props.userId },
+              query: { activeTab: 'upload' },
+            }"
             class="bg-blue-500 text-white px-4 py-2 rounded font-medium hover:bg-blue-600 transition flex items-center"
           >
             <svg
@@ -219,7 +245,7 @@ console.log('ada file : ', props.albums.files)
         class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition duration-300"
       >
         <div class="relative h-48">
-          <img src="" alt="Album cover" class="w-full h-full object-cover" />
+          <img :src="album.coverImage" alt="Album cover" class="w-full h-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
           <div class="absolute bottom-0 left-0 p-4">
             <router-link :to="`/album/${album.id}/details`">
@@ -227,49 +253,46 @@ console.log('ada file : ', props.albums.files)
             </router-link>
             <!-- <p class="text-gray-200">{{ album.photoCount }} Media</p> -->
             <div class="flex items-center space-x-2">
-              <div class="flex items-center space-x-2">
-                <span class="text-white">{{ album.imageCount }} </span>
-
+              <div class="flex items-center space-x-1 text-white text-sm">
+                <span>{{ album.imageCount }}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
                   stroke="currentColor"
-                  class="size-4"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
+                    stroke-width="1.5"
                     d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
                   />
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
+                    stroke-width="1.5"
+                    d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"
                   />
                 </svg>
               </div>
-
-              <div class="flex items-center space-x-1">
-                <span class="text-white">{{ album.videoCount }} </span>
-
+              <div class="flex items-center space-x-1 text-white text-sm">
+                <span>{{ album.videoCount }}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
                   stroke="currentColor"
-                  class="size-4"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
+                    stroke-width="1.5"
                     d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"
                   />
                 </svg>
               </div>
-
             </div>
           </div>
         </div>
@@ -296,7 +319,7 @@ console.log('ada file : ', props.albums.files)
                 </svg>
               </router-link>
               <button
-                @click="deleteAlbumModalOpen = true"
+                @click="deleteAlbum(album)"
                 class="text-gray-500 hover:text-red-500 cursor-pointer"
               >
                 <svg
@@ -385,7 +408,8 @@ console.log('ada file : ', props.albums.files)
       >
         <DeleteAlbumModalComponent
           @close-modal="deleteAlbumModalOpen = false"
-          @delete-album="deleteAlbum"
+          @delete-album-handler="deleteAlbumHandler"
+          :album-id="albumIdSelected"
         />
       </div>
     </transition>

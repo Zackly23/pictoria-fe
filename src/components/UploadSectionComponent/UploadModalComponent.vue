@@ -1,6 +1,9 @@
 <script setup>
 import api from '@/api'
-import { computed, ref, watch } from 'vue'
+import { ref } from 'vue'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const previewActive = ref(false)
 const file = ref({
@@ -99,7 +102,31 @@ const uploadMedia = async () => {
     }
   } catch (error) {
     console.error('status errro ', error.status)
-    console.error('error simpan album media : ', error)
+    if (error.response && error.response.status === 413) {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Gagal',
+        detail: 'Ukuran file terlalu besar. Maksimal 10MB per file.',
+        life: 3000,
+      })
+      return
+    } else if (error.response && error.response.status === 451) {
+      // Handle validation errors
+      toast.add({
+        severity: 'warn',
+        summary: 'Kapasitas Penuh',
+        detail:
+          'Kapasitas album sudah penuh. Silakan hapus beberapa file sebelum mengunggah yang baru.',
+        life: 3000,
+      })
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Gagal',
+        detail: 'Kesalahan Menyimpan Album.',
+        life: 3000,
+      })
+    }
   }
 }
 </script>
@@ -192,7 +219,7 @@ const uploadMedia = async () => {
                 @click="uploadMedia"
                 class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition w-full cursor-pointer"
               >
-                Upload Image
+                Upload Media
               </button>
             </div>
           </div>

@@ -15,6 +15,7 @@ const albumID = route.params.albumId
 const viewMode = ref(1) // 1 for grid view, 2 for list view
 const sortOrder = ref('asc')
 const sortBy = ref('date')
+
 const albumDetail = ref({
   id: 1,
   title: 'Summer Memories 2025',
@@ -24,12 +25,16 @@ const albumDetail = ref({
   creator: {
     creatorID: '',
     createdBy: 'John Programming',
+    isAlbumUserOwn: false,
   },
   watcherHasLike: false,
   tags: ['Nature', 'Technology', 'Vacation', 'Bali'],
   likes: '1.2 k',
   imageCount: 0,
   videoCount: 0,
+  viewCount: 0,
+  albumPrivacy: '',
+  targetEmails: [],
   medias: [
     {
       id: 1,
@@ -42,7 +47,6 @@ const albumDetail = ref({
       watcherHasLike: false,
     },
   ],
-
 })
 
 const albumBucket = ref([
@@ -57,8 +61,6 @@ const albumBucket = ref([
     likes: 0,
   },
 ])
-
-
 
 const getAlbumDetail = async () => {
   try {
@@ -82,10 +84,23 @@ const getAlbumDetail = async () => {
     albumDetail.value.imageCount = albumData.image_count
     albumDetail.value.videoCount = albumData.video_count
     albumDetail.value.watcherHasLike = response.data.user_has_like
+    albumDetail.value.albumPrivacy = albumData.album_privacy
+    albumDetail.value.viewCount = albumData.view_count
+    albumDetail.value.createdAt = albumData.created_at
     albumDetail.value.creator = {
       creatorID: albumData.user_detail.user_id,
       createdBy: albumData.user_detail.full_name,
+      isAlbumUserOwn: albumData.user_detail.user_id === response.data.user_login_id,
     }
+    albumDetail.value.targetEmails = albumData.target_email
+
+    console.log(
+      'album creator user id : ',
+      albumData.user_detail.user_id,
+      ' user login : ',
+      user.id,
+    )
+    console.log('ini ? = ', albumData.user_detail.user_id === user.id)
 
     const media = medias.map((file, idx) => {
       return {
@@ -94,12 +109,18 @@ const getAlbumDetail = async () => {
         url: file.url,
         type: file.media_kind,
         description: file.description,
-        createdAt: file.created_at,
+        createdAt: file.created_at_modified,
         watcherHasLike: file.user_has_like,
         // createdBy: 'John Photographer',
         likes: file.likes_count,
       }
     })
+
+    // if (albumDetail.value.creator.creatorID === user.id) {
+    //   console.log('bro ini kerha ga ? ', albumDetail.value.creator.creatorID === user.id)
+    //   isAlbumUserOwn.value = true
+
+    // }
 
     albumDetail.value.medias = media
 
@@ -133,7 +154,7 @@ const changeSortOrder = (sort) => {
 }
 
 const uploadNewImage = async () => {
-  await getAlbumDetail()
+  window.location.reload()
 }
 
 const clickLikeAlbum = async () => {

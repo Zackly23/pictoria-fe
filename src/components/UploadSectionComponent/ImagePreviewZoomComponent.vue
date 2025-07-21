@@ -80,11 +80,13 @@ console.log('image preview is : ', props.image)
       <div class="">
         <div class="max-w-2xl mx-auto">
           <div class="bg-gray-100 rounded-lg p-4">
-            <div class="rounded-lg overflow-hidden mb-4">
+            <div
+              class="w-full rounded-lg overflow-hidden mb-4 bg-black flex items-center justify-center"
+            >
               <img
                 v-if="props.media.type === 'image'"
                 :src="props.media.url"
-                class="w-full max-h-[400px]"
+                class="max-w-full max-h-[65vh] object-contain"
                 alt="Image preview"
               />
 
@@ -92,7 +94,7 @@ console.log('image preview is : ', props.image)
                 v-else-if="props.media.type === 'video'"
                 :key="`${props.media.type}-${props.media.id}`"
                 controls
-                class="w-full max-h-[400px]"
+                class="max-w-full max-h-[65vh] object-contain"
               >
                 <source :src="props.media.url" type="video/mp4" />
                 Your browser does not support the video tag.

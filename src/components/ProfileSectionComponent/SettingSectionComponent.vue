@@ -2,11 +2,13 @@
 import api from '@/api'
 import QRCode from 'qrcode'
 import { onMounted, ref } from 'vue'
+import countriesData from '../../../src/assets/file/countries.json'
 import ResetPasswordModalComponent from './ResetPasswordModalComponent.vue'
 import TwoFactorAuthModalComponent from './TwoFactorAuthModalComponent.vue'
 import DeactivateAccountModalComponent from './DeactivateAccountModalComponent.vue'
 import DeleteAccountModalComponent from './DeleteAccountModalComponent.vue'
 
+const countries = ref(countriesData)
 const TFAEnabled = ref(true)
 const twoFactorModalOpen = ref(false)
 const resetPasswordModalOpen = ref(false)
@@ -27,6 +29,10 @@ const props = defineProps({
   userConfiguration: {
     type: Object,
     required: true,
+  },
+  isUserHasSameId: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -113,13 +119,14 @@ const configureTFA = async () => {
 }
 
 onMounted(() => {
+  // console.log('countries : ', countries)
   //initiate
   TFAEnabled.value = props.userConfiguration.enableTFA
 })
 </script>
 
 <template>
-  <div class="block md:flex">
+  <div v-if="props.isUserHasSameId" class="block md:flex">
     <!-- Left Sidebar Navigation -->
     <div class="w-full md:w-64 border-gray-200 pr-4 h-full">
       <!-- <h2 class="text-2xl font-bold mb-6 ml-4">Account Settings</h2> -->
@@ -226,6 +233,7 @@ onMounted(() => {
                   type="tel"
                   id="phone"
                   name="phone"
+                  placeholder="+123"
                   v-model="props.userProfile.phone"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 />
@@ -294,11 +302,9 @@ onMounted(() => {
                   @keyup.enter="changeCountry($event.target.value)"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
                 >
-                  <option value="US" selected>United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="UK">United Kingdom</option>
-                  <option value="AU">Australia</option>
-                  <option value="JP">Japan</option>
+                  <option v-for="country in countries" :value="country.code" selected>
+                    {{ country.name }}
+                  </option>
                 </select>
               </div>
             </div>

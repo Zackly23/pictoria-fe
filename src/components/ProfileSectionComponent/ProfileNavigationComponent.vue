@@ -4,6 +4,10 @@ const props = defineProps({
     type: String,
     default: 'albums',
   },
+  isUserHasSameId: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['change-active-tab'])
@@ -25,6 +29,7 @@ const changeActiveTab = (tab) => {
           Albums
         </button>
         <button
+          v-if="props.isUserHasSameId"
           @click="changeActiveTab('upload')"
           :class="{ 'tab-active': props.activeTab === 'upload' }"
           class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap"
@@ -39,6 +44,7 @@ const changeActiveTab = (tab) => {
           About
         </button> -->
         <button
+          v-if="props.isUserHasSameId"
           @click="changeActiveTab('settings')"
           :class="{ 'tab-active': props.activeTab === 'settings' }"
           class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap"
@@ -46,6 +52,7 @@ const changeActiveTab = (tab) => {
           Settings
         </button>
         <button
+          v-if="props.isUserHasSameId"
           @click="changeActiveTab('subscription')"
           :class="{ 'tab-active': props.activeTab === 'subscription' }"
           class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap"
@@ -53,7 +60,8 @@ const changeActiveTab = (tab) => {
           Subscription
         </button>
 
-          <button
+        <button
+          v-if="props.isUserHasSameId"
           @click="changeActiveTab('followers')"
           :class="{ 'tab-active': props.activeTab === 'followers' }"
           class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap"

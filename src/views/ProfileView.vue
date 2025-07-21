@@ -1,6 +1,6 @@
 <script setup>
 import api from '@/api'
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import UploadSectionComponent from '@/components/UploadSectionComponent/UploadSectionComponent.vue'
 import AlbumSectionComponent from '@/components/ProfileSectionComponent/AlbumSectionComponent.vue'
@@ -8,11 +8,15 @@ import SettingSectionComponent from '@/components/ProfileSectionComponent/Settin
 import ProfileStatsComponent from '@/components/ProfileSectionComponent/ProfileStatsComponent.vue'
 import ProfileHeaderComponent from '@/components/ProfileSectionComponent/ProfileHeaderComponent.vue'
 import ProfileNavigationComponent from '@/components/ProfileSectionComponent/ProfileNavigationComponent.vue'
+import FollowerAlbumUpdateComponent from '@/components/ProfileSectionComponent/FollowerAlbumUpdateComponent.vue'
+import SubscriptionSectionComponent from '@/components/ProfileSectionComponent/SubscriptionSectionComponent.vue'
 
 const route = useRoute()
 const router = useRouter()
 
 const userData = JSON.parse(localStorage.getItem('user'))
+const userDataID = computed(() => route.params.userId)
+const isUserHasSameId = ref(false)
 const lastPage = ref(10)
 const totalAlbum = ref(0)
 const currentPage = ref(1)
@@ -26,6 +30,7 @@ const accountConfiguration = ref({
 })
 
 const userProfile = ref({
+  userID: '',
   fullname: '',
   username: '',
   email: '',
@@ -40,6 +45,7 @@ const userProfile = ref({
   company: '',
   avatar: '',
   bio: '',
+  areYouFollowedByUserLooking: false,
   tags: [],
   socialMedias: {
     instagram: '',
@@ -70,9 +76,9 @@ const changeViewMode = (mode) => {
   viewMode.value = mode
 
   if (viewMode.value === 'more-grid') {
-    limitPage.value = 12;
+    limitPage.value = 12
   } else {
-    limitPage.value = 8;
+    limitPage.value = 8
   }
 }
 
@@ -81,13 +87,27 @@ const changeSortBy = (sort) => {
   console.log('sort by berubah ke : ', sortBy.value)
 }
 
+const userFollow = async () => {
+  await getUserProfile()
+}
+
 const changePage = (page) => {
   currentPage.value = page
 
   console.log('page berubah ke : ', currentPage.value)
 }
 
+const storeNewAlbumHandler = () => {
+  // getAllAlbums()
+  activeTab.value = 'albums'
+  window.location.reload()
+}
 
+const deleteAlbumHandler = () => {
+  // getAllAlbums()
+  activeTab.value = 'albums'
+  window.location.reload()
+}
 
 const newUserProfile = async (user) => {
   //call api to get new user profile
@@ -98,7 +118,7 @@ const newUserProfile = async (user) => {
   }
 
   try {
-    const responses = await api.put(`/users/${userData.id}`, {
+    const responses = await api.put(`/users/${userProfile.value.userID}`, {
       full_name: userProfile.value.fullname,
       user_name: userProfile.value.username,
       email: userProfile.value.email,
@@ -131,7 +151,7 @@ const newUserProfile = async (user) => {
 //API Call
 const getUserConfiguration = async () => {
   try {
-    const responses = await api.get(`users/${userData.id}/configuration`)
+    const responses = await api.get(`users/${userDataID.value}/configuration`)
 
     const config = responses.data.account_config
 
@@ -149,13 +169,14 @@ const getUserConfiguration = async () => {
 const getUserProfile = async () => {
   try {
     // Simulate an API call to fetch user profile
-    const response = await api.get(`/users/${userData.id}`)
+    const response = await api.get(`/users/${userDataID.value}`)
 
     console.log('User Profile: ', response.data)
 
     const users = response.data.user
     const mediaStats = response.data.media_count
 
+    userProfile.value.userID = users.id
     userProfile.value.fullname = users.first_name + ' ' + users.last_name
     userProfile.value.username = users.user_name
     userProfile.value.email = users.email
@@ -170,6 +191,7 @@ const getUserProfile = async () => {
     userProfile.value.avatar = users.profile_picture
     userProfile.value.subscription = users.subscription
     userProfile.value.bio = users.bio
+    userProfile.value.areYouFollowedByUserLooking = users.are_you_following_user
     userProfile.value.tags = users.tag_preferences || []
     userProfile.value.socialMedias = {
       instagram: users.social_media?.instagram,
@@ -187,6 +209,8 @@ const getUserProfile = async () => {
       storagePercentage: mediaStats.storage_percentage,
     }
 
+    console.log('is user same ? = ', isUserHasSameId.value)
+
     console.log('User Profile after update: ', userProfile.value)
   } catch (error) {
     console.error('Error fetching user profile:', error)
@@ -199,7 +223,7 @@ const getAllAlbums = async () => {
     console.log('sort by : ', sortBy.value)
     const response = await api.get('/albums', {
       params: {
-        user_id: route.params.userId,
+        user_id: userDataID.value,
         sort_by: sortBy.value,
         search: '',
         page: currentPage.value,
@@ -221,8 +245,8 @@ const getAllAlbums = async () => {
       coverImage: album.thumbnail_url,
     }))
 
-    lastPage.value = response.data.total_pages;
-    totalAlbum.value = response.data.total;
+    lastPage.value = response.data.total_pages
+    totalAlbum.value = response.data.total
 
     console.log('Albums after update: ', albums.value)
   } catch (error) {
@@ -266,12 +290,32 @@ watch(
   },
 )
 
+watch(
+  () => route.params.userId,
+  async (newId, oldId) => {
+    if (newId !== oldId) {
+      currentPage.value = 1
+      activeTab.value = 'albums'
+      if (userData.id === userDataID.value) {
+        isUserHasSameId.value = true
+      }
+      await getUserProfile()
+      await getAllAlbums()
+      await getUserConfiguration()
+    }
+  },
+  { immediate: true },
+)
+
 //watch for sortby and current page, call for getAllAlbums
 watch([sortBy, currentPage, limitPage], () => {
   getAllAlbums()
 })
 
 onMounted(() => {
+  if (userData.id === userDataID.value) {
+    isUserHasSameId.value = true
+  }
   console.log('route.params.userId:', route.params.userId)
 
   getRecentPhotos()
@@ -283,10 +327,15 @@ onMounted(() => {
 
 <template>
   <!-- Profile Header -->
-  <ProfileHeaderComponent :user-data="userData" :user-profile="userProfile" />
+  <ProfileHeaderComponent
+    @user-follow="userFollow"
+    :user-data-id="userDataID"
+    :user-profile="userProfile"
+    :is-user-has-same-id="isUserHasSameId"
+  />
 
   <!-- Profile Stats (Mobile) -->
-  <ProfileStatsComponent :user-profile="userProfile" />
+  <ProfileStatsComponent :user-profile="userProfile" :is-user-has-same-id="isUserHasSameId" />
 
   <!-- Subscription Info (Mobile) -->
   <!-- <section class="md:hidden bg-white border-b border-gray-200 py-3">
@@ -312,7 +361,11 @@ onMounted(() => {
   </section> -->
 
   <!-- Profile Navigation -->
-  <ProfileNavigationComponent :active-tab="activeTab" @change-active-tab="changeActiveTab" />
+  <ProfileNavigationComponent
+    :active-tab="activeTab"
+    @change-active-tab="changeActiveTab"
+    :is-user-has-same-id="isUserHasSameId"
+  />
 
   <!-- Tab Content -->
   <section class="container mx-auto px-4 py-8">
@@ -327,23 +380,38 @@ onMounted(() => {
       :recent-photos="recentPhotos"
       :lastPage="lastPage"
       :totalAlbum="totalAlbum"
-
+      :is-user-has-same-id="isUserHasSameId"
+      :user-id="userDataID"
+      @delete-album-handler="deleteAlbumHandler"
     />
 
     <!-- Upload Tab  -->
     <div v-show="activeTab === 'upload'">
       <div class="px-2">
-        <UploadSectionComponent :user-data="userData" />
+        <UploadSectionComponent
+          :user-data-id="userDataID"
+          :is-user-has-same-id="isUserHasSameId"
+          @store-new-album-handler="storeNewAlbumHandler"
+        />
       </div>
     </div>
 
     <!-- Settings Tab Content -->
     <div v-show="activeTab === 'settings'">
       <SettingSectionComponent
+        :is-user-has-same-id="isUserHasSameId"
         :user-profile="userProfile"
         :user-configuration="accountConfiguration"
         @new-user-profile="newUserProfile"
       />
+    </div>
+
+    <div v-show="activeTab === 'followers'">
+      <FollowerAlbumUpdateComponent />
+    </div>
+
+    <div v-show="activeTab === 'subscription'">
+      <SubscriptionSectionComponent />
     </div>
   </section>
 </template>

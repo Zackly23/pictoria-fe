@@ -2,12 +2,20 @@
 import api from '@/api'
 import router from '@/router'
 import { ref, computed } from 'vue'
+import { validateAlbumUpload } from '@/validations/AlbumValidation'
+import { useToast } from 'primevue/usetoast'
 
-const emits = defineEmits(['new-store-album'])
+const toast = useToast()
+const errorsAlbumUpload = ref()
+const emits = defineEmits(['store-new-album-handler'])
 const props = defineProps({
-  userData: {
-    type: Object,
+  userDataId: {
+    type: String,
     required: true,
+  },
+  isUserHasSameId: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -37,6 +45,28 @@ const resetForm = () => {
 // Simulasi upload
 const storeNewAlbum = async () => {
   try {
+    const { isValid, errors } = validateAlbumUpload(
+      files.value,
+      albumTitle.value,
+      albumDescription.value,
+      selectedTags.value,
+      privacy.value,
+      selectedEmails.value,
+    )
+
+    if (!isValid) {
+      errorsAlbumUpload.value = errors
+
+      toast.add({
+        severity: 'warn',
+        summary: 'Validasi Gagal',
+        detail: 'Mohon isi data album dengan benar.',
+        life: 3000,
+      })
+
+      return
+    }
+
     const formData = new FormData()
 
     // Title, Description, Privacy
@@ -79,15 +109,45 @@ const storeNewAlbum = async () => {
 
     console.log('Upload sukses:', response.data)
 
-    if (response.status === 200) {
-      router.push({
-        name: 'profile',
-        params: { userId: props.userData.id },
-        query: { activeTab: 'albums' },
+    if (response.status === 201) {
+      console.log('to albun sadada')
+      toast.add({
+        severity: 'success',
+        summary: 'Album Tersimpan',
+        detail: 'Album berhasil disimpan.',
+        life: 3000,
       })
+
+      emits('store-new-album-handler')
     }
   } catch (error) {
     console.error('Upload gagal:', error)
+    //if error status 413 raise toast
+    if (error.response && error.response.status === 413) {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Gagal',
+        detail: 'Ukuran file terlalu besar. Maksimal 10MB per file.',
+        life: 3000,
+      })
+      return
+    } else if (error.response && error.response.status === 451) {
+      // Handle validation errors
+      toast.add({
+        severity: 'warn',
+        summary: 'Kapasitas Penuh',
+        detail:
+          'Kapasitas album sudah penuh. Silakan hapus beberapa file sebelum mengunggah yang baru.',
+        life: 3000,
+      })
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Gagal',
+        detail: 'Kesalahan Menyimpan Album.',
+        life: 3000,
+      })
+    }
   }
 }
 
@@ -156,6 +216,7 @@ const filteredTargetEmails = computed(() =>
 
   <!-- Dropzone -->
   <div
+    v-if="props.isUserHasSameId"
     class="border-2 border-dashed rounded-lg p-8 text-center mb-6 transition-all"
     :class="dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-500'"
     @dragenter.prevent="dragActive = true"
@@ -170,6 +231,9 @@ const filteredTargetEmails = computed(() =>
       multiple
       accept="image/*, video/*"
       class="hidden"
+      :class="{
+        'border-red-500': errorsAlbumUpload?.media,
+      }"
       @change="handleFileChange"
     />
 
@@ -194,6 +258,10 @@ const filteredTargetEmails = computed(() =>
       <p class="text-gray-400 text-sm">Maximum file size: 10MB per image</p>
     </div>
   </div>
+
+  <p v-if="errorsAlbumUpload?.media" class="text-red-500 text-sm mt-1">
+    {{ errorsAlbumUpload?.media }}
+  </p>
 
   <!-- Upload Progress -->
   <div v-if="uploading" class="mb-6">
@@ -269,9 +337,16 @@ const filteredTargetEmails = computed(() =>
       <input
         v-model="albumTitle"
         type="text"
+        :class="{
+          'border-red-500': errorsAlbumUpload?.title,
+        }"
         class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder="Enter album title"
       />
+
+      <p v-if="errorsAlbumUpload?.title" class="text-red-500 text-sm mt-1">
+        {{ errorsAlbumUpload?.title }}
+      </p>
     </div>
 
     <div class="mb-4">
@@ -320,6 +395,9 @@ const filteredTargetEmails = computed(() =>
           v-model="tagInput"
           @keydown.enter.prevent="addTag"
           class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          :class="{
+            'border-red-500': errorsAlbumUpload?.tag,
+          }"
           placeholder="Add a tag"
         />
         <button
@@ -329,6 +407,9 @@ const filteredTargetEmails = computed(() =>
           Add
         </button>
       </div>
+      <p v-if="errorsAlbumUpload?.tag" class="text-red-500 text-sm mt-1">
+        {{ errorsAlbumUpload?.tag }}
+      </p>
 
       <div class="mt-2">
         <p class="text-sm text-gray-600 mb-1">Suggested tags:</p>
@@ -407,6 +488,9 @@ const filteredTargetEmails = computed(() =>
           @keydown.enter.prevent="addTargetEmail"
           class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Add a email"
+          :class="{
+            'border-red-500': errorsAlbumUpload?.targetEmail,
+          }"
         />
         <button
           @click="addTargetEmail"
@@ -415,6 +499,10 @@ const filteredTargetEmails = computed(() =>
           Add
         </button>
       </div>
+
+      <p v-if="errorsAlbumUpload?.targetEmail" class="text-red-500 text-sm mt-1">
+        {{ errorsAlbumUpload?.targetEmail }}
+      </p>
 
       <div class="flex flex-wrap gap-2 mb-2">
         <span
