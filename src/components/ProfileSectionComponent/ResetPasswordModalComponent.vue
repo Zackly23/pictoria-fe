@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import api from '@/api'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const showCurrentPassword = ref(false)
 const showNewPassword = ref(false)
 const emit = defineEmits(['close-modal'])

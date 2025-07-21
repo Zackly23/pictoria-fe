@@ -7,7 +7,11 @@ import ImageDetailView from '@/views/ImageDetailView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import UploadSectionView from '@/views/UploadSectionView.vue'
 import AlbumsView from '@/views/AlbumsView.vue'
-import AlbumVideoTest from '@/views/AlbumVideoTest.vue'
+// import AlbumVideoTest from '@/views/AlbumVideoTest.vue'
+import NotFound from '@/views/NotFound.vue'
+import Forbidden from '@/views/Forbidden.vue'
+
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -41,11 +45,11 @@ const router = createRouter({
           name: 'temp-image',
           component: ImageDetailView,
         },
-        {
-          path: '/albums',
-          name: 'albums',
-          component: AlbumsView,
-        },
+        // {
+        //   path: '/albums',
+        //   name: 'albums',
+        //   component: AlbumsView,
+        // },
       ],
     },
     {
@@ -58,11 +62,21 @@ const router = createRouter({
       name: 'signup',
       component: AuthView,
     },
+    // {
+    //   path: '/album/test/:albumId',
+    //   name: 'test-album',
+    //   component: AlbumVideoTest,
+    // },
     {
-      path: '/album/test/:albumId',
-      name: 'test-album',
-      component: AlbumVideoTest
-    }
+      path: '/403',
+      name: 'Forbidden',
+      component: Forbidden,
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: NotFound,
+    },
   ],
 })
 

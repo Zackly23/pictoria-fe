@@ -6,11 +6,20 @@ import { useAuthStore } from '@/stores/auth'
 import { validateLogin } from '@/validations/LoginValidation'
 import { validateSignup } from '@/validations/SignupValidation'
 import api from '@/api'
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const authStore = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
+const totpModalOpen = ref(false)
+const totpCode = ref('')
+const totpError = ref('')
+const verifyTotpLoading = ref(false)
+const user = ref()
+const accessToken = ref()
+const refreshToken = ref()
 const emailLogin = ref('')
 const passwordLogin = ref('')
 const emailSignup = ref('')
@@ -18,7 +27,7 @@ const passwordSignup = ref('')
 const confirmPassword = ref('')
 const firstName = ref('')
 const lastName = ref('')
-const rememberMe = ref(false)
+const rememberMe = ref(true)
 const termsAccepted = ref(false)
 
 const showCurrentPasswordLogin = ref(false)
@@ -30,43 +39,139 @@ const errorsSignup = ref()
 
 const resetPasswordModalOpen = ref(false)
 
-const userLogin = async () => {
-  // Logic for user login
-  console.log('Logging in')
-  // Check validation
-  const { isValid, errors } = validateLogin(emailLogin.value, passwordLogin.value)
+const onTotpInput = (event) => {
+  totpCode.value = event.target.value.replace(/\D/g, '').slice(0, 6)
 
+  if (totpError.value) {
+    totpError.value = ''
+  }
+
+  if (totpCode.value.length === 6) {
+    verifyTotpLoading.value = true
+    verifyTotp()
+  }
+}
+
+const verifyTotp = async () => {
+  if (totpCode.value.length !== 6) {
+    totpError.value = 'Kode harus 6 digit'
+    return
+  }
+
+  // verifyTotpLoading.value = true
+  totpError.value = ''
+
+  try {
+    const response = await api.post(
+      '/auth/verify-tfa',
+      {
+        code: totpCode.value,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken.value}`,
+        },
+      },
+    )
+
+    console.log('response data otp : ', response.data)
+    // Simulasi delay (ganti dengan API call sebenarnya)
+    // await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    // Contoh: validasi sukses
+    console.log('Kode yang dikirim:', totpCode.value)
+
+    // Reset atau tutup modal, dll.
+    if (response.status === 200) {
+      totpCode.value = ''
+      totpError.value = ''
+
+      console.log('Login response totp:', response.data)
+      console.log('accessToken totp:', accessToken.value)
+      console.log('refreshToken totp:', refreshToken.value)
+
+      authStore.setUser(user.value)
+      authStore.setToken(accessToken.value, refreshToken)
+
+      toast.add({
+        severity: 'success',
+        summary: 'Login Berhasil',
+        detail: `Selamat datang, ${user.value.name}`,
+        life: 3000,
+      })
+
+      if (localStorage.getItem('last_visited_page')) {
+        router.push(localStorage.getItem('last_visited_page'))
+      }
+
+      router.push(`/profile/${user.value.id}`)
+    }
+  } catch (error) {
+    totpError.value = 'Terjadi kesalahan saat verifikasi'
+  } finally {
+    verifyTotpLoading.value = false
+  }
+}
+
+const userLogin = async () => {
+  console.log('Logging in')
+
+  // Validasi input
+  const { isValid, errors } = validateLogin(emailLogin.value, passwordLogin.value)
   if (!isValid) {
     errorsLogin.value = errors
+
+    toast.add({
+      severity: 'warn',
+      summary: 'Validasi Gagal',
+      detail: 'Mohon isi email dan password dengan benar.',
+      life: 3000,
+    })
 
     return
   }
 
-  const response = await api.post('/auth/login', {
-    email: emailLogin.value,
-    password: passwordLogin.value,
-  })
+  try {
+    const response = await api.post('/auth/login', {
+      email: emailLogin.value,
+      password: passwordLogin.value,
+    })
 
-  if (response.status === 200) {
-    const user = response.data.user
-    const accessToken = response.data.access_token
-    const refreshToken = response.data.refresh_token
+    if (response.status === 200) {
+      user.value = response.data.user
+      accessToken.value = response.data.access_token
+      refreshToken.value = response.data.refresh_token
 
-    console.log('Login response:', response.data)
-    console.log('accessToken:', accessToken)
-    console.log('refreshToken:', refreshToken)
+      const isTFAactive = user.value.is_two_factor_enabled
 
-    authStore.setUser(user)
-    authStore.setToken(accessToken, refreshToken)
+      if (isTFAactive) {
+        totpModalOpen.value = true
+      } else {
+        authStore.setUser(user.value)
+        authStore.setToken(accessToken.value, refreshToken.value)
 
-    if (localStorage.getItem('last_visited_page')) {
-      router.push(localStorage.getItem('last_visited_page'))
+        // const lastPage = localStorage.getItem('last_visited_page')
+        console.log('woy')
+        router.push(`/profile/${user.value.id}`)
+      }
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Login Gagal',
+        detail: 'Email atau password salah.',
+        life: 3000,
+      })
     }
+  } catch (error) {
+    console.error('login gagal ', error)
 
-    router.push(`/profile/${user.id}`)
+    toast.add({
+      severity: 'error',
+      summary: 'Terjadi Kesalahan',
+      detail: 'Server tidak merespons. Coba lagi nanti.',
+      life: 3000,
+    })
   }
-
-  // console.log('Logging in with:', emailLogin.value, passwordLogin.value)
 }
 
 const userSignup = async () => {
@@ -97,15 +202,23 @@ const userSignup = async () => {
     confirmPassword.value,
   )
 
-  const response = await api.post('/auth/signup', {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    email: emailSignup.value,
-    password: passwordSignup.value,
-    passwordConfirm: confirmPassword.value,
-  })
+  try {
+    const response = await api.post('/auth/signup', {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      email: emailSignup.value,
+      password: passwordSignup.value,
+      passwordConfirm: confirmPassword.value,
+      agreeTermService: termsAccepted.value
+    })
 
-  console.log('Signup response:', response.data)
+    if (response.status === 201) {
+      console.log('Signup response:', response.data)
+      router.push({ path: '/login' })
+    }
+  } catch (error) {
+    console.error('error signup: ', error)
+  }
 }
 
 // Ambil form yang sesuai dengan URL
@@ -609,10 +722,10 @@ const changeRoute = (newTab) => {
                 <p class="mt-6 text-center text-gray-600">
                   <span>Already have an account? </span>
                   <button
-                    @click="tab = 'login'"
-                    class="cursor-pointer text-blue-500 hover:text-blue-700 font-medium"
+                    @click="changeRoute('login')"
+                    class="text-blue-500 hover:text-blue-700 font-medium cursor-pointer"
                   >
-                    Sign in
+                    Sign In
                   </button>
                 </p>
               </div>
@@ -634,6 +747,84 @@ const changeRoute = (newTab) => {
       </div>
     </transition>
   </div>
+
+  <!-- modal full screen, input for 6 digit otp  -->
+  <transition name="fade-zoom" appear>
+    <div
+      v-show="totpModalOpen"
+      class="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm bg-black/30 h-full"
+      role="dialog"
+    >
+      <div class="bg-white rounded-xl shadow-lg p-8 max-w-md w-full relative">
+        <button
+          class="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          @click="totpModalOpen = false"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <h2 class="text-2xl font-bold mb-4 text-center">Two-Factor Authentication</h2>
+        <p class="mb-6 text-gray-600 text-center">
+          Enter the 6-digit code from your authenticator app
+        </p>
+        <div class="flex justify-center mb-4">
+          <input
+            v-model="totpCode"
+            maxlength="6"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            class="text-center text-3xl tracking-[0.5em] px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition w-60 bg-gray-50 placeholder-gray-300"
+            placeholder="------"
+            @input="onTotpInput"
+          />
+        </div>
+        <p v-if="totpError" class="text-red-500 text-center mb-4">{{ totpError }}</p>
+        <button
+          @click="verifyTotp"
+          :disabled="verifyTotpLoading"
+          class="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600"
+        >
+          <span v-if="verifyTotpLoading" class="flex items-center justify-center gap-2">
+            <svg
+              class="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+            Verifying...
+          </span>
+          <span v-else> Verify </span>
+        </button>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <style>

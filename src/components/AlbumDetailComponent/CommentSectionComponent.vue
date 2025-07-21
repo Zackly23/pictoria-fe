@@ -167,22 +167,8 @@ onMounted(() => {
     <div v-show="showComments" class="space-y-4 divide-y divide-gray-200">
       <div v-for="comment in filteredComments" :key="comment.id" class="pt-4">
         <div class="flex items-start space-x-3">
-          <div class="bg-gray-200 text-gray-500 p-2 rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          </div>
+            <img :src="comment.avatar" alt="User" sizes="6" class="w-8 h-8 rounded-full" srcset="" />
+      
           <div class="flex-grow">
             <div class="flex justify-between items-start">
               <div>

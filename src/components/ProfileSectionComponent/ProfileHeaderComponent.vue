@@ -2,18 +2,24 @@
 import api from '@/api'
 import { computed, ref } from 'vue'
 
+const emits = defineEmits(['user-follow'])
+
 const props = defineProps({
   userProfile: {
     type: Object,
     required: true,
   },
-  userData: {
-    type: Object,
+  userDataId: {
+    type: String,
     required: true,
+  },
+  isUserHasSameId: {
+    type: Boolean,
+    default: false,
   },
 })
 
-const userHasFollow = ref(false)
+// const userHasFollow = ref(props.userProfile.areYouFollowedByUserLooking)
 const previewUrl = computed(() => props.userProfile?.avatar)
 const initials = computed(() => props.userProfile.fullname.split(' ')[0]) // Ganti dengan nama pengguna dinamis jika perlu
 
@@ -34,7 +40,7 @@ const uploadAvatar = async (event) => {
     formData.append('profile_picture', file)
 
     const response = await api.put(
-      `users/${props.userData.id}/profile/picture`,
+      `users/${props.userDataId}/profile/picture`,
       formData, // <- wajib pakai FormData
       {
         headers: {
@@ -43,14 +49,37 @@ const uploadAvatar = async (event) => {
       },
     )
 
+    emits('user-follow')
     console.log('response update profile: ', response)
   } catch (error) {
     console.error('error update profile: ', error)
   }
 }
 
+const followingUser = async () => {
+  try {
+    const response = await api.post(
+      `/users/follow`,
+      {},
+      {
+        params: {
+          user_to_follow: props.userDataId,
+        },
+      },
+    )
+
+    console.log('response followe : ', response.data)
+    emits('user-follow')
+    // userHasFollow.value = response.data.is_user_now_follow
+  } catch (error) {
+    console.error('error following : ', error)
+  }
+}
+
 console.log('user profile pic : ', props.userProfile)
 console.log('previewurl : ', previewUrl.value)
+console.log('user has follow : ', props.userProfile.areYouFollowedByUserLooking)
+// console.log("user has folloe : ", userHasFollow.value)
 </script>
 
 <template>
@@ -74,7 +103,10 @@ console.log('previewurl : ', previewUrl.value)
             </div>
 
             <!-- Ikon kamera -->
-            <div class="absolute top-0 left-2 bg-white rounded-full p-1 shadow-lg">
+            <div
+              v-if="props.isUserHasSameId"
+              class="absolute top-0 left-2 bg-white rounded-full p-1 shadow-lg"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -94,6 +126,7 @@ console.log('previewurl : ', previewUrl.value)
 
           <!-- Input file disembunyikan -->
           <input
+            v-if="props.isUserHasSameId"
             type="file"
             id="profilePicture"
             accept="image/*"
@@ -137,13 +170,23 @@ console.log('previewurl : ', previewUrl.value)
           <p class="text-gray-700 max-w-2xl mb-6">
             {{ props.userProfile.bio }}
           </p>
-          <div class="flex flex-wrap justify-center md:justify-start gap-4">
+          <div
+            v-if="!props.isUserHasSameId"
+            class="flex flex-wrap justify-center md:justify-start gap-4"
+          >
             <button
-              @click="userHasFollow = !userHasFollow"
-              class="bg-blue-500 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-600 transition"
+              @click="followingUser"
+              class="text-white px-6 py-2 rounded-full font-medium transition"
+              :class="{
+                'hover:bg-blue-600 bg-blue-500': !props.userProfile.areYouFollowedByUserLooking,
+                'hover:bg-amber-600 bg-amber-500': props.userProfile.areYouFollowedByUserLooking,
+              }"
             >
-              <span v-if="!userHasFollow">Follow</span>
-              <div v-else-if="userHasFollow" class="flex items-center">
+              <span v-if="!props.userProfile.areYouFollowedByUserLooking">Follow</span>
+              <div
+                v-else-if="props.userProfile.areYouFollowedByUserLooking"
+                class="flex items-center"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5 mr-1"
@@ -182,7 +225,7 @@ console.log('previewurl : ', previewUrl.value)
             </a>
           </div>
         </div>
-        <div class="hidden md:block">
+        <div v-if="props.isUserHasSameId" class="hidden md:block">
           <div class="bg-blue-50 rounded-lg p-4 text-center">
             <div class="flex space-x-8 mb-2">
               <div>
@@ -202,8 +245,8 @@ console.log('previewurl : ', previewUrl.value)
               <div class="flex justify-between items-center mb-2">
                 <span class="text-gray-600">Storage:</span>
                 <span class="font-medium"
-                  >{{ props.userProfile.stats.storageUsed }} GB /
-                  {{ props.userProfile.stats.storageTotal }} GB
+                  >{{ props.userProfile.stats.storageUsed }} /
+                  {{ props.userProfile.stats.storageTotal }}
                 </span>
               </div>
               <div class="w-full bg-gray-200 rounded-full h-2">
