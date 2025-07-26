@@ -7,7 +7,9 @@ import { validateLogin } from '@/validations/LoginValidation'
 import { validateSignup } from '@/validations/SignupValidation'
 import api from '@/api'
 import { useToast } from 'primevue/usetoast'
+import VueTurnstile from 'vue-turnstile'
 
+const token = ref('')
 const toast = useToast()
 const authStore = useAuthStore()
 
@@ -131,6 +133,8 @@ const userLogin = async () => {
     return
   }
 
+  console.log('token : ', token.value)
+
   try {
     const response = await api.post('/auth/login', {
       email: emailLogin.value,
@@ -209,7 +213,7 @@ const userSignup = async () => {
       email: emailSignup.value,
       password: passwordSignup.value,
       passwordConfirm: confirmPassword.value,
-      agreeTermService: termsAccepted.value
+      agreeTermService: termsAccepted.value,
     })
 
     if (response.status === 201) {
@@ -445,6 +449,8 @@ const changeRoute = (newTab) => {
                     />
                     <label for="remember" class="ml-2 block text-gray-700">Remember me</label>
                   </div>
+
+                  <VueTurnstile v-model="token" site-key="0x4AAAAAABmjNUYaqKXVSQ7C" />
 
                   <button
                     @click="userLogin"
