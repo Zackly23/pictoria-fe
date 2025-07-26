@@ -3,7 +3,8 @@ import { ref } from 'vue'
 
 const previewActive = ref(false)
 const fileName = ref('')
-const imageUrl = ref('') // ini untuk URL hasil upload
+const mediaUrl = ref('') // ini untuk URL hasil upload
+const mediaTypePrev = ref('')
 const albumImageTempUrl = ref('') // ini untuk URL hasil upload
 const copied = ref(false)
 const uploadSuccess = ref(false)
@@ -19,9 +20,12 @@ const handleFileChange = (event) => {
 
     fileName.value = file.name
     previewActive.value = true
-    imageUrl.value = URL.createObjectURL(file)
+    mediaUrl.value = URL.createObjectURL(file)
     albumImageTempUrl.value = `http://localhost:5173/image/${fileId}/temp`
     copied.value = false
+
+    const isImage = file.type.startsWith('image/')
+    mediaTypePrev.value = isImage ? 'image' : 'video'
   }
 }
 
@@ -47,8 +51,8 @@ const copyToClipboard = async () => {
 <template>
   <section class="container mx-auto px-4 py-4 mb-16">
     <div class="bg-white p-8 md:p-12 rounded-lg shadow-md">
-      <h2 class="text-3xl font-bold text-center mb-4">Try It Now</h2>
-      <p class="text-gray-600 text-center mb-8">Experience how simple image hosting can be</p>
+      <h2 class="text-3xl font-bold text-center mb-4">Try One Now</h2>
+      <p class="text-gray-600 text-center mb-8">Experience how simple media hosting can be</p>
 
       <div>
         <div
@@ -57,13 +61,13 @@ const copyToClipboard = async () => {
           @click="$refs.fileInput.click()"
         >
           <div class="text-4xl text-blue-500 mb-4 text-center">📁</div>
-          <p class="text-lg text-gray-600 mb-2 text-center">Drag & Drop your image here</p>
+          <p class="text-lg text-gray-600 mb-2 text-center">Drag & Drop your media here</p>
           <p class="text-sm text-gray-500 text-center">or click to browse files</p>
           <input
             type="file"
             ref="fileInput"
             class="hidden"
-            accept="image/*"
+            accept="image/*,video/*"
             @change="handleFileChange"
           />
         </div>
@@ -89,7 +93,18 @@ const copyToClipboard = async () => {
             </div>
 
             <div class="rounded-lg overflow-hidden mb-4">
-              <img :src="imageUrl" class="w-full h-auto" alt="Image preview" />
+              <img
+                v-if="mediaTypePrev === 'image'"
+                :src="mediaUrl"
+                class="w-full max-h-[300px] object-contain"
+                alt="Image preview"
+              />
+              <video
+                v-else-if="mediaTypePrev === 'video'"
+                controls
+                class="w-full h-auto object-cover"
+                :src="mediaUrl"
+              ></video>
             </div>
 
             <div>
@@ -97,7 +112,7 @@ const copyToClipboard = async () => {
                 @click="uploadSuccess = true"
                 class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition w-full cursor-pointer"
               >
-                Upload Image
+                Upload File
               </button>
             </div>
             <!-- Copy URL -->
@@ -119,7 +134,7 @@ const copyToClipboard = async () => {
         </div>
       </div>
 
-      <p class="text-gray-500 text-center">Free accounts can upload up to 10 images per day</p>
+      <!-- <p class="text-gray-500 text-center">Free accounts can upload up to 10 images per day</p> -->
     </div>
   </section>
 </template>

@@ -4,7 +4,8 @@ import FeatureSectionComponent from '@/components/HomeComponent/FeatureSectionCo
 import ImageUploadSectionComponent from '@/components/HomeComponent/ImageUploadSectionComponent.vue'
 import PopularImageSectionComponent from '@/components/HomeComponent/PopularImageSectionComponent.vue'
 import GallerySectionComponent from '@/components/HomeComponent/GallerySectionComponent.vue'
-import TestimonialSectionComponent from '@/components/HomeComponent/TestimonialSectionComponent.vue'
+// import TestimonialSectionComponent from '@/components/HomeComponent/TestimonialSectionComponent.vue'
+import FAQSectionComponent from '@/components/HomeComponent/FAQSectionComponent.vue'
 </script>
 
 <template>
@@ -24,5 +25,7 @@ import TestimonialSectionComponent from '@/components/HomeComponent/TestimonialS
   <GallerySectionComponent />
 
   <!-- Testimonials Section -->
-  <TestimonialSectionComponent />
+  <!-- <TestimonialSectionComponent /> -->
+  <!-- FAQ  -->
+  <FAQSectionComponent />
 </template>
