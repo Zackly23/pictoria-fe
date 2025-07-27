@@ -45,11 +45,11 @@ const router = createRouter({
           name: 'temp-image',
           component: ImageDetailView,
         },
-        // {
-        //   path: '/albums',
-        //   name: 'albums',
-        //   component: AlbumsView,
-        // },
+        {
+          path: '/albums',
+          name: 'albums',
+          component: AlbumsView,
+        },
       ],
     },
     {
