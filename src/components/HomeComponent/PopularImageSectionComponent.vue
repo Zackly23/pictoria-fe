@@ -65,7 +65,7 @@ const featuredImages = ref([
 
 <template>
   <section class="container mx-auto px-4 py-8 mb-6">
-    <h2 class="text-3xl font-bold text-center mb-8">Featured Images</h2>
+    <h2 class="text-3xl font-bold text-center mb-8">Popular Images</h2>
     <p class="text-center text-gray-600 mb-10">Discover what others are sharing on PixelVault</p>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 image-grid">

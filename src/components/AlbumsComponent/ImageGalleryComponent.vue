@@ -1,4 +1,6 @@
 <script setup>
+// const emits = defineEmits(['change-sort-category'])
+
 const props = defineProps({
   albums: {
     type: Array,
@@ -9,6 +11,13 @@ const props = defineProps({
     default: 'grid',
   },
 })
+
+// const changeSortCategory = (sort) => {
+//   console.log('sort: ', sort)
+//   emits('change-sort-category', sort)
+
+//   console.log('new sort : ', props.sortOrder)
+// }
 </script>
 
 <template>
@@ -51,7 +60,16 @@ const props = defineProps({
                   />
                 </svg>
               </div>
-              <h3 class="text-md sm:text-lg font-semibold mb-2" v-text="album.name"></h3>
+              <h3 class="text-md sm:text-lg font-semibold" v-text="album.name"></h3>
+            </router-link>
+
+            <router-link
+              :to="'/profile/' + album.creatorId"
+              class="text-xs text-gray-500 hover:text-red-600 transition-colors duration-200"
+            >
+              <p class="text-sm text-gray-600 mb-1 hidden sm:block">
+                {{ album.creatorName || 'Unknown' }}
+              </p>
             </router-link>
             <div class="hidden sm:flex flex-wrap gap-1 mb-3">
               <div v-for="tag in album.tags" :key="tag">
@@ -228,19 +246,33 @@ const props = defineProps({
                         />
                       </router-link>
                     </div>
+
                     <div>
-                      <router-link to="/album/1/details">
+                      <router-link
+                        :to="'/album/' + album.id + '/details'"
+                        class="group-hover:text-indigo-600"
+                      >
                         <span
                           class="font-medium text-gray-800 group-hover:text-indigo-600 transition-colors duration-200"
                           v-text="album.name"
                         ></span>
                       </router-link>
                       <p class="hidden md:block text-sm text-gray-500">
-                        Ini adalah deskripsi dari album
+                        {{
+                          (album.description || 'No description available')
+                            .split(' ')
+                            .slice(0, 10)
+                            .join(' ')
+                        }}
                       </p>
-                      <p class="text-xs text-gray-400 mt-1 hidden sm:block">
-                        By: David Dwi Nugroho
-                      </p>
+                      <router-link
+                        :to="'/profile/' + album.creatorId"
+                        class="text-xs text-gray-500 hover:text-red-600 transition-colors duration-200"
+                      >
+                        <p class="text-xs text-gray-400 mt-1 hidden sm:block">
+                          By: {{ album.creatorName || 'Unknown' }}
+                        </p>
+                      </router-link>
                       <!-- Mobile only tags -->
                       <div class="flex flex-wrap gap-1 mt-2 md:hidden">
                         <div v-for="tag in album.tags" :key="tag" class="mb-1">
@@ -352,11 +384,12 @@ const props = defineProps({
           Try adjusting your search filters or browse a different category to find what you're
           looking for.
         </p>
-        <button
+        <!-- <button
+          @click="changeSortCategory('')"
           class="mt-6 px-6 py-2 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 transition-colors duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           Browse All albums
-        </button>
+        </button> -->
       </div>
     </div>
   </section>

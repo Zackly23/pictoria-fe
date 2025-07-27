@@ -139,6 +139,7 @@ const userLogin = async () => {
     const response = await api.post('/auth/login', {
       email: emailLogin.value,
       password: passwordLogin.value,
+      token: token.value,
     })
 
     if (response.status === 200) {
