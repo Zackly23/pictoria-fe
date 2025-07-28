@@ -1,6 +1,13 @@
 <script setup>
 import { ref } from 'vue'
 
+const props = defineProps({
+  tempMediaId: {
+    type: String,
+    required: true,
+  },
+})
+
 const shareLinks = ref({
   direct: 'https://pixelvault.com/albums/summer-2025',
   embedUrl: 'https://pixelvault.com/embed/albums/summer-2025',
@@ -82,7 +89,7 @@ function shareOn(platform) {
         <input
           type="text"
           readonly
-          value='<iframe src="https://pixelvault.com/embed/albums/summer-2025" width="100%" height="500" frameborder="0"></iframe>'
+          :value="`https://pixelvault.site/image/${props.tempMediaId}/temp`"
           class="bg-gray-100 px-4 py-3 rounded-l flex-grow focus:outline-none"
         />
         <button

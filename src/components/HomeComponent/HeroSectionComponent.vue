@@ -34,16 +34,18 @@ onMounted(() => {
     <div class="container mx-auto px-4">
       <div class="flex flex-col md:flex-row items-center">
         <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
-          <h1 class="text-4xl md:text-5xl font-bold mb-6">Store Your Images with Confidence</h1>
+          <h1 class="text-4xl md:text-5xl font-bold mb-6">Store and Share Albums Securely</h1>
           <p class="text-lg max-w-xl mb-10">
-            Fast, secure, and reliable image hosting for professionals, creators, and everyone in
-            between.
+            Store photos and videos securely in flexible, organized albums. Follow others and
+            control visibility.
           </p>
+
           <a
             href="#"
             class="bg-white text-blue-500 px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:-translate-y-1 transition duration-300 inline-block"
-            >Get Started - It's Free</a
           >
+            Get Started - It’s Free
+          </a>
         </div>
 
         <!-- Slideshow -->

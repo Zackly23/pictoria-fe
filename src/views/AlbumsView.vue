@@ -1,15 +1,19 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import CategoryHeaderComponent from '@/components/AlbumsComponent/CategoryHeaderComponent.vue'
 import FilterSearchComponent from '@/components/AlbumsComponent/FilterSearchComponent.vue'
 import ImageGalleryComponent from '@/components/AlbumsComponent/ImageGalleryComponent.vue'
 import PaginationComponent from '@/components/AlbumsComponent/PaginationComponent.vue'
 import CategoryPillComponent from '@/components/AlbumsComponent/CategoryPillComponent.vue'
 import axios from 'axios'
+import { useRoute, useRouter } from 'vue-router'
+import router from '@/router'
 
+const route = useRoute()
 const searchQuery = ref('')
 const viewMode = ref('grid')
-const currentCategory = ref('')
+// Ambil category dari query, default ke ' ' (spasi) jika tidak ada
+const currentCategory = ref(route.query.category || 'All')
 const sortOrder = ref('recent')
 const currentPageNumber = ref(1)
 const lastPageNumber = ref(10)
@@ -102,8 +106,18 @@ watch(
   () => {
     getAllPublicAlbum()
   },
-  { immediate: true }
+  { immediate: true },
 )
+
+watch(currentCategory, (newVal) => {
+  router.push({
+    name: 'albums',
+    query: {
+      ...route.query,
+      category: newVal,
+    },
+  })
+})
 
 onMounted(() => {
   getAllPublicAlbum()

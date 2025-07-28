@@ -10,7 +10,8 @@ import AlbumsView from '@/views/AlbumsView.vue'
 // import AlbumVideoTest from '@/views/AlbumVideoTest.vue'
 import NotFound from '@/views/NotFound.vue'
 import Forbidden from '@/views/Forbidden.vue'
-
+import PricingView from '@/views/PricingView.vue'
+import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,11 @@ const router = createRouter({
           name: 'albums',
           component: AlbumsView,
         },
+        {
+          path: '/pricing',
+          name: 'pricing',
+          component: PricingView,
+        },
       ],
     },
     {
@@ -62,11 +68,17 @@ const router = createRouter({
       name: 'signup',
       component: AuthView,
     },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: ForgotPasswordView
+    },
     // {
     //   path: '/album/test/:albumId',
     //   name: 'test-album',
     //   component: AlbumVideoTest,
     // },
+
     {
       path: '/403',
       name: 'Forbidden',

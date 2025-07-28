@@ -4,27 +4,33 @@ import { ref } from 'vue'
 // List FAQ
 const faqs = ref([
   {
-    question: "What is imgPID.id's free image hosting service?",
+    question: 'What is Pixovault?',
     answer:
-      "imgPID.id is a free image hosting service that allows you to upload, store, and share images online. We provide direct links, embed codes, and various image sizes for your uploaded images.",
+      'Pixovault is a media hosting platform that helps you easily store, organize, and share your photos and videos in albums — fast, secure, and flexible.',
     open: false,
   },
   {
-    question: 'Is there a limit to how many images I can upload?',
+    question: 'How much storage do I get for free?',
     answer:
-      'No, there are no limits on the number of images you can upload. You can upload as many images as you need, completely free.',
+      'You get 5 GB of free storage when you sign up. Need more? Upgrade to Advanced (50 GB) or Enterprise (Unlimited).',
     open: false,
   },
   {
-    question: 'What image formats are supported?',
+    question: 'What file formats are supported?',
     answer:
-      'We support all popular image formats including JPEG, PNG, GIF, WebP, BMP, and TIFF. Maximum file size is 32MB per image.',
+      'Pixovault supports all major image and video formats, including JPG, PNG, GIF, WebP, MP4, MOV, and more.',
     open: false,
   },
   {
-    question: 'How long will my images be stored?',
+    question: 'How long will my media be stored?',
     answer:
-      'Images uploaded to imgPID.id are stored permanently. We do not delete images unless they violate our terms of service.',
+      'Your media is stored for as long as you want — as long as you access your account at least once every 90 days.',
+    open: false,
+  },
+  {
+    question: 'Can I control who sees my albums?',
+    answer:
+      'Yes! Pixovault gives you full control over album visibility. Choose between Public, Private, or Restricted (only specific emails you allow can view).',
     open: false,
   },
 ])

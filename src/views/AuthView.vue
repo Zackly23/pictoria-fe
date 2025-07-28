@@ -1,6 +1,6 @@
 <script setup>
 import ForgetPasswordModalComponent from '@/components/ForgetPasswordModalComponent.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { validateLogin } from '@/validations/LoginValidation'
@@ -233,6 +233,36 @@ const tab = computed(() => (route.path === '/signup' ? 'signup' : 'login'))
 const changeRoute = (newTab) => {
   router.push({ path: `/${newTab}` })
 }
+
+const backgrounds = [
+  '/background_1.png',
+  '/background_2.jpg',
+  '/background_3.jpg',
+  '/background_4.jpg',
+  '/background_5.jpg',
+]
+
+const currentIndex = ref(0)
+let intervalId
+
+const backgroundStyle = computed(() => ({
+  backgroundImage: `
+    linear-gradient(to bottom right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url('${backgrounds[currentIndex.value]}')
+  `,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+}))
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    currentIndex.value = (currentIndex.value + 1) % backgrounds.length
+  }, 5000)
+})
+onUnmounted(() => {
+  clearInterval(intervalId)
+})
 </script>
 
 <template>
@@ -244,29 +274,33 @@ const changeRoute = (newTab) => {
           <div class="md:flex">
             <!-- Left side image and content -->
             <div class="auth-container hidden md:block md:w-1/2 relative">
+              <!-- Background Gradient -->
               <div
-                class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-80"
+                class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-700 opacity-90"
               ></div>
-              <div
-                class="absolute inset-0 flex flex-col justify-center items-center text-white p-8"
-              >
-                <div class="text-4xl font-bold mb-4">Welcome Back!</div>
-                <p class="text-lg mb-6 text-center">
-                  Store, share, and showcase your images with the world's most trusted platform
-                </p>
-                <div class="flex justify-center space-x-4">
-                  <div class="bg-white bg-opacity-20 p-4 rounded-lg text-center">
-                    <div class="text-2xl font-bold">5M+</div>
-                    <div class="text-sm">Images</div>
+
+              <!-- Overlay Content -->
+              <div class="absolute inset-0 overflow-hidden">
+                <!-- Layer gambar -->
+                <transition name="fade" mode="out-in">
+                  <div
+                    :key="currentIndex"
+                    class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                    :style="backgroundStyle"
+                  ></div>
+                </transition>
+
+                <!-- Konten -->
+                <div
+                  class="absolute inset-0 flex flex-col justify-center items-center text-white p-10 text-center"
+                >
+                  <div class="text-4xl font-extrabold mb-3">
+                    {{ tab === 'login' ? 'Welcome Back!' : 'Let’s Get Started!' }}
                   </div>
-                  <div class="bg-white bg-opacity-20 p-4 rounded-lg text-center">
-                    <div class="text-2xl font-bold">500K+</div>
-                    <div class="text-sm">Users</div>
-                  </div>
-                  <div class="bg-white bg-opacity-20 p-4 rounded-lg text-center">
-                    <div class="text-2xl font-bold">99.9%</div>
-                    <div class="text-sm">Uptime</div>
-                  </div>
+                  <p class="text-lg text-white/80 mb-6 max-w-md">
+                    Store, share, and showcase your media securely with Pixovault — trusted by
+                    thousands worldwide.
+                  </p>
                 </div>
               </div>
             </div>
@@ -305,6 +339,7 @@ const changeRoute = (newTab) => {
                 <!-- ... (keep login form content here) -->
                 <div class="mb-6 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                   <button
+                    :disabled="true"
                     class="flex items-center justify-center bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition w-full cursor-pointer"
                   >
                     <svg
@@ -333,6 +368,7 @@ const changeRoute = (newTab) => {
                   </button>
 
                   <button
+                    :disabled="true"
                     class="flex items-center justify-center bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition w-full cursor-pointer"
                   >
                     <svg
@@ -837,5 +873,14 @@ const changeRoute = (newTab) => {
 <style>
 .form-fade-in {
   transition: opacity 0.3s ease;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s ease-in-out;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
