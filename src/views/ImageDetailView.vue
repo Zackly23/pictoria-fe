@@ -1,29 +1,48 @@
 <script setup>
 import URLCopyComponent from '@/components/AlbumDetailComponent/URLCopyComponent.vue'
+import axios from 'axios'
 import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-const isLoading = ref(true)
+const route = useRoute()
+const router = useRouter()
+const tempMediaId = ref(route.params.id)
 const viewMode = ref(1)
-const images = ref([
-  // sample images
-  {
-    id: 1,
-    src: 'image1.jpg',
-    title: 'Image 1',
-    likes: 10,
-    date: '2024-04-25',
-    tags: ['tag1', 'tag2'],
-  },
-])
+const images = ref([])
 
 const toggleLike = (index) => {
   images.value[index].likes++
 }
 
+const getTemporaryMediaUrl = async () => {
+  try {
+    const response = await axios.get('http://localhost:3001/api/v1/temp/media', {
+      params: { temp_id: tempMediaId.value },
+    })
+
+    console.log('Temporary media response:', response.data)
+    if (response.status === 200) {
+      const imageData = response.data.data
+
+      images.value.push({
+        id: imageData.id,
+        src: imageData.media_url,
+        title: imageData.title || 'Temporary Image',
+        likes: imageData.like_count || 0,
+        date: imageData.created_at,
+      })
+    } else {
+      console.error('Failed to fetch temporary media:', response.statusText)
+      return
+    }
+  } catch (error) {
+    console.error('Error fetching temporary media:', error)
+    router.push('/404')
+  }
+}
+
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false
-  }, 1000)
+  getTemporaryMediaUrl()
 })
 </script>
 
@@ -49,7 +68,7 @@ onMounted(() => {
             </svg>
           </div>
           <div>
-            <h1 class="text-2xl font-bold">Summer Memories 2025</h1>
+            <h1 class="text-2xl font-bold">Pixovault Media</h1>
             <div class="flex items-center mt-1">
               <span class="text-gray-600">• By Anonim</span>
               <span class="mx-2 text-gray-400">•</span>
@@ -105,7 +124,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <URLCopyComponent />
+      <URLCopyComponent :temp-media-id="tempMediaId"/>
     </section>
   </div>
 </template>

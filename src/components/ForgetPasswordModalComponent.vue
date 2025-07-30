@@ -2,28 +2,41 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api'
+import { useToast } from 'primevue/usetoast'
+import axios from 'axios'
+
+const toast = useToast()
 
 const router = useRouter()
 const emailResetPassword = ref('')
 const emit = defineEmits(['close-modal'])
 
 const sendResetPassword = async () => {
+  console.log('emailResetPassword : ', emailResetPassword.value)
   try {
-    const response = await api.post('/reset-password', {
+    const response = await axios.post('http://127.0.0.1:3001/api/v1/auth/reset-password', {
       email: emailResetPassword.value,
     })
 
     console.log('email : ', emailResetPassword.value)
 
     if (response.status === 200) {
-      console.log(response)
-      console.log('permintaan terkirim')
-      // Tampilkan notifikasi sukses
-      alert('Permintaan reset password telah dikirim. Silakan periksa email Anda.')
+      toast.add({
+        severity: 'success',
+        summary: 'Reset Password',
+        detail: 'Email reset password telah dikirim',
+        life: 3000,
+      })
       // Tutup modal
       closeModal()
     }
   } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Gagal mengirim email',
+      detail: 'Terjadi kesalahan saat mengirim email reset password',
+      life: 3000,
+    })
     console.error(error)
   }
 }

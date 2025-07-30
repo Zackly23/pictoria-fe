@@ -1,27 +1,57 @@
 <script setup>
+import axios from 'axios'
 import { ref } from 'vue'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const previewActive = ref(false)
 const fileName = ref('')
-const imageUrl = ref('') // ini untuk URL hasil upload
+const mediaUrl = ref('') // ini untuk URL hasil upload
+const mediaTypePrev = ref('')
 const albumImageTempUrl = ref('') // ini untuk URL hasil upload
 const copied = ref(false)
 const uploadSuccess = ref(false)
+const fileInput = ref(null)
+
+const fileElement = ref(null) // untuk <input> DOM
+const selectedFile = ref(null) // untuk menyimpan File
 
 const handleFileChange = (event) => {
   const file = event.target.files[0]
-  if (file) {
-    //create object for storing in backend
-    const formData = new FormData()
-    formData.append('file', file)
-    // get id of the file response from backend
-    const fileId = '12345' // replace with actual file ID from backend response
+  console.log('Selected file:', file)
 
+  if (file) {
+    selectedFile.value = file // Simpan filenya di ref yang berbeda
     fileName.value = file.name
     previewActive.value = true
-    imageUrl.value = URL.createObjectURL(file)
-    albumImageTempUrl.value = `http://localhost:5173/image/${fileId}/temp`
+    mediaUrl.value = URL.createObjectURL(file)
     copied.value = false
+    mediaTypePrev.value = file.type.startsWith('image/') ? 'image' : 'video'
+
+    console.log('Selected file saved in ref:', selectedFile.value)
+  }
+}
+
+const uploadTemporaryMedia = async () => {
+  console.log('Uploading file:', selectedFile.value)
+  try {
+    const formData = new FormData()
+    formData.append('media_temp', selectedFile.value)
+
+    const response = await axios.post(`${API_BASE_URL}/api/v1/temp/media`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    if (response.status === 200) {
+      uploadSuccess.value = true
+      albumImageTempUrl.value = `http://localhost:5173/image/${response.data.temp_media.id}/temp`
+      // mediaUrl.value = response.data.temp_media.media_url
+    } else {
+      console.error('Upload failed:', response.statusText)
+    }
+  } catch (error) {
+    console.error('Upload error:', error)
   }
 }
 
@@ -47,23 +77,23 @@ const copyToClipboard = async () => {
 <template>
   <section class="container mx-auto px-4 py-4 mb-16">
     <div class="bg-white p-8 md:p-12 rounded-lg shadow-md">
-      <h2 class="text-3xl font-bold text-center mb-4">Try It Now</h2>
-      <p class="text-gray-600 text-center mb-8">Experience how simple image hosting can be</p>
+      <h2 class="text-3xl font-bold text-center mb-4">Try One Now</h2>
+      <p class="text-gray-600 text-center mb-8">Experience how simple media hosting can be</p>
 
       <div>
         <div
           v-if="!previewActive"
           class="border-2 border-dashed border-blue-400 rounded-lg p-12 max-w-2xl mx-auto mb-6 cursor-pointer hover:bg-blue-50 transition duration-300"
-          @click="$refs.fileInput.click()"
+          @click="$refs.fileElement.click()"
         >
           <div class="text-4xl text-blue-500 mb-4 text-center">📁</div>
-          <p class="text-lg text-gray-600 mb-2 text-center">Drag & Drop your image here</p>
+          <p class="text-lg text-gray-600 mb-2 text-center">Drag & Drop your media here</p>
           <p class="text-sm text-gray-500 text-center">or click to browse files</p>
           <input
             type="file"
-            ref="fileInput"
+            ref="fileElement"
             class="hidden"
-            accept="image/*"
+            accept="image/*,video/*"
             @change="handleFileChange"
           />
         </div>
@@ -89,15 +119,26 @@ const copyToClipboard = async () => {
             </div>
 
             <div class="rounded-lg overflow-hidden mb-4">
-              <img :src="imageUrl" class="w-full h-auto" alt="Image preview" />
+              <img
+                v-if="mediaTypePrev === 'image'"
+                :src="mediaUrl"
+                class="w-full max-h-[300px] object-contain"
+                alt="Image preview"
+              />
+              <video
+                v-else-if="mediaTypePrev === 'video'"
+                controls
+                class="w-full h-auto object-cover"
+                :src="mediaUrl"
+              ></video>
             </div>
-
+            <p class="text-red-400 text-sm mb-2 text-bold">Your image will only be available for 30 minutes</p>
             <div>
               <button
-                @click="uploadSuccess = true"
+                @click="uploadTemporaryMedia"
                 class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition w-full cursor-pointer"
               >
-                Upload Image
+                Upload File
               </button>
             </div>
             <!-- Copy URL -->
@@ -119,7 +160,7 @@ const copyToClipboard = async () => {
         </div>
       </div>
 
-      <p class="text-gray-500 text-center">Free accounts can upload up to 10 images per day</p>
+      <!-- <p class="text-gray-500 text-center">Free accounts can upload up to 10 images per day</p> -->
     </div>
   </section>
 </template>

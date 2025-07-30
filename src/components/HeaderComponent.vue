@@ -10,6 +10,10 @@ const open = ref(false)
 const isLogin = ref(JSON.parse(localStorage.getItem('user')) ? true : false)
 const userProfile = ref(JSON.parse(localStorage.getItem('user')))
 
+const openContact = () => {
+  window.location.href = 'mailto:support@pixovault.com'
+}
+
 const signOut = async () => {
   console.log('Signing out...')
   try {
@@ -38,7 +42,7 @@ const signOut = async () => {
     <div class="container mx-auto px-4 py-4">
       <nav class="flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <svg
+          <!-- <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-8 w-8 text-blue-500"
             viewBox="0 0 20 20"
@@ -49,9 +53,11 @@ const signOut = async () => {
               d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
               clip-rule="evenodd"
             />
-          </svg>
+          </svg> -->
+
+          <img src="/pixovault.png" alt="PixoVault Logo" class="h-12 w-12 mr-2" />
           <router-link to="/" class="text-gray-800 text-lg font-semibold">
-            <span class="text-xl font-bold text-blue-500">PixelVault</span>
+            <span class="text-xl font-bold text-blue-500">PixoVault</span>
           </router-link>
         </div>
         <div class="hidden md:flex space-x-8">
@@ -61,21 +67,30 @@ const signOut = async () => {
           <router-link to="/" class="font-medium text-gray-600 hover:text-blue-500 transition"
             >Features</router-link
           >
-          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
+          <router-link
+            to="/pricing"
+            class="font-medium text-gray-600 hover:text-blue-500 transition"
             >Pricing</router-link
           >
-          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
+          <!-- <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
             >Blog</router-link
+          > -->
+          <button
+            @click="openContact"
+            class="font-medium text-gray-600 hover:text-blue-500 transition cursor-pointer"
           >
-          <router-link to="" class="font-medium text-gray-600 hover:text-blue-500 transition"
-            >Contact</router-link
-          >
+            Contact
+          </button>
         </div>
 
         <!-- User Section  -->
         <div v-if="isLogin" class="flex items-center space-x-4">
           <router-link
-            :to="{ name: 'profile', params: { userId: userProfile?.id }, query: { activeTab: 'upload' } }"
+            :to="{
+              name: 'profile',
+              params: { userId: userProfile?.id || 1 },
+              query: { activeTab: 'upload' },
+            }"
             class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 transition hidden md:block"
           >
             Upload

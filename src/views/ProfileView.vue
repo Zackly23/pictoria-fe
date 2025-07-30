@@ -10,6 +10,9 @@ import ProfileHeaderComponent from '@/components/ProfileSectionComponent/Profile
 import ProfileNavigationComponent from '@/components/ProfileSectionComponent/ProfileNavigationComponent.vue'
 import FollowerAlbumUpdateComponent from '@/components/ProfileSectionComponent/FollowerAlbumUpdateComponent.vue'
 import SubscriptionSectionComponent from '@/components/ProfileSectionComponent/SubscriptionSectionComponent.vue'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -98,15 +101,25 @@ const changePage = (page) => {
 }
 
 const storeNewAlbumHandler = () => {
-  // getAllAlbums()
   activeTab.value = 'albums'
-  window.location.reload()
+
+  setTimeout(() => {
+    window.location.reload()
+  }, 50) // kasih delay kecil, 50–100 ms cukup
 }
+
 
 const deleteAlbumHandler = () => {
   // getAllAlbums()
   activeTab.value = 'albums'
   window.location.reload()
+
+  toast.add({
+    severity: 'success',
+    summary: 'Delete Success',
+    detail: 'Album deleted successfully.',
+    life: 3000,
+  })
 }
 
 const newUserProfile = async (user) => {
@@ -139,10 +152,22 @@ const newUserProfile = async (user) => {
 
     if (responses.status === 200) {
       //panggil api getUserProfile
+      toast.add({
+        severity: 'success',
+        summary: 'Update Success',
+        detail: 'Profile updated successfully.',
+        life: 3000,
+      })
       await getUserProfile()
     }
   } catch (error) {
     console.error('error update data : ', error)
+    toast.add({
+      severity: 'error',
+      summary: 'Update Failed',
+      detail: 'Failed to update profile. Please try again.',
+      life: 3000,
+    })
   }
 
   console.log('data baru nih : ', userProfile.value)
@@ -295,9 +320,11 @@ watch(
   async (newId, oldId) => {
     if (newId !== oldId) {
       currentPage.value = 1
-      activeTab.value = 'albums'
       if (userData.id === userDataID.value) {
         isUserHasSameId.value = true
+        activeTab.value = route.query.activeTab
+      } else {
+        activeTab.value = 'albums'
       }
       await getUserProfile()
       await getAllAlbums()

@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 const currentCategory = ref('Nature')
 const categories = ref([
+  'All',
   'Nature',
   'Architecture',
   'Travel',
@@ -28,6 +29,10 @@ const changeCurrentCategory = (cat) => {
   console.log('')
 
   currentCategory.value = cat
+  // if (cat === 'All') {
+  //   cat = ''
+  // }
+
   emits('change-category', cat)
 
   console.log('after : ')

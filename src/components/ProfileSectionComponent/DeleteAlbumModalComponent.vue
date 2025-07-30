@@ -1,6 +1,9 @@
 <script setup>
 import api from '@/api'
 import { ref } from 'vue'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const deleteAlbumConfirmation = ref('')
 const emits = defineEmits(['close-modal', 'delete-album-handler'])
@@ -31,6 +34,12 @@ const deleteAlbum = async () => {
     }
   } catch (error) {
     console.error('error delete : ', error)
+    toast.add({
+      severity: 'error',
+      summary: 'Delete Error',
+      detail: 'Failed to delete album. Please try again.',
+      life: 3000,
+    })
   }
 }
 </script>

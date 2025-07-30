@@ -48,7 +48,7 @@ const changeSortCategory = (sort) => {
         <div>
           <input
             type="text"
-            placeholder="Search by name or tags..."
+            placeholder="Search by title or descrip..."
             class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition"
             @input="changeSearch($event.target.value)"
             @keyup.enter="changeSearch($event.target.value)"
@@ -74,10 +74,10 @@ const changeSortCategory = (sort) => {
             @change="changeSortCategory($event.target.value)"
             @keyup.enter="changeSortCategory($event.target.value)"
           >
-            <option value="newest">Newest First</option>
+            <option value="recent">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="popular">Most Popular</option>
-            <option value="likes">Most Likes</option>
+            <!-- <option value="likes">Most Likes</option> -->
           </select>
         </div>
       </div>
@@ -91,10 +91,9 @@ const changeSortCategory = (sort) => {
             @change="changeSortCategory($event.target.value)"
             @keyup.enter="changeSortCategory($event.target.value)"
           >
-            <option value="newest">Newest First</option>
+            <option value="recent">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="popular">Most Popular</option>
-            <option value="likes">Most Likes</option>
           </select>
         </div>
 
