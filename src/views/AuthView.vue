@@ -6,8 +6,11 @@ import { useAuthStore } from '@/stores/auth'
 import { validateLogin } from '@/validations/LoginValidation'
 import { validateSignup } from '@/validations/SignupValidation'
 import api from '@/api'
+import axios from 'axios'
 import { useToast } from 'primevue/usetoast'
 import VueTurnstile from 'vue-turnstile'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const token = ref('')
 const toast = useToast()
@@ -40,6 +43,18 @@ const errorsLogin = ref()
 const errorsSignup = ref()
 
 const resetPasswordModalOpen = ref(false)
+
+const loginWithGoogle = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/auth/google/login`) // ini endpoint Fiber kamu
+    const { url } = response.data
+
+    // redirect ke Google login
+    window.location.href = url
+  } catch (err) {
+    console.error('Failed to get Google login URL:', err)
+  }
+}
 
 const onTotpInput = (event) => {
   totpCode.value = event.target.value.replace(/\D/g, '').slice(0, 6)
@@ -339,8 +354,9 @@ onUnmounted(() => {
                 <!-- ... (keep login form content here) -->
                 <div class="mb-6 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                   <button
-                    :disabled="true"
-                    class="flex items-center justify-center bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition w-full cursor-pointer"
+                    :disable="true"
+                    @click="loginWithGoogle"
+                    class="flex items-center justify-center bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition w-full cursor-not-allowed pointer-events-none"
                   >
                     <svg
                       class="w-5 h-5 mr-2"
@@ -369,7 +385,7 @@ onUnmounted(() => {
 
                   <button
                     :disabled="true"
-                    class="flex items-center justify-center bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition w-full cursor-pointer"
+                    class="flex items-center justify-center bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition w-full cursor-not-allowed pointer-events-none"
                   >
                     <svg
                       class="w-5 h-5 mr-2"
@@ -718,7 +734,7 @@ onUnmounted(() => {
 
                 <div class="grid grid-cols-2 gap-4">
                   <button
-                    class="cursor-pointer flex items-center justify-center bg-white border border-gray-300 rounded-lg p-2 hover:bg-gray-50 transition"
+                    class="cursor-not-allowed pointer-events-none flex items-center justify-center bg-white border border-gray-300 rounded-lg p-2 hover:bg-gray-50 transition"
                   >
                     <svg
                       class="w-5 h-5 mr-2"
@@ -746,7 +762,7 @@ onUnmounted(() => {
                   </button>
 
                   <button
-                    class="cursor-pointer flex items-center justify-center bg-blue-600 text-white rounded-lg p-2 hover:bg-blue-700 transition"
+                    class="cursor-not-allowed pointer-events-none flex items-center justify-center bg-blue-600 text-white rounded-lg p-2 hover:bg-blue-700 transition"
                   >
                     <svg
                       class="w-5 h-5 mr-2"

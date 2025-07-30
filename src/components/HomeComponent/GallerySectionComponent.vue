@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 const albumByCategories = ref([
   {
     id: 1,
@@ -43,7 +45,7 @@ const albumByCategories = ref([
 
 const getPopularCategory = async () => {
   try {
-    const response = await axios.get('http://localhost:3001/api/v1/category/popular')
+    const response = await axios.get(`${API_BASE_URL}/api/v1/category/popular`)
     const featuredImagesData = response.data.albums // Assuming the API returns an array of images
     console.log('response category: ', response.data)
 
@@ -70,7 +72,12 @@ onMounted(() => {
     <h2 class="text-3xl font-bold text-center mb-8">Explore by Category</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <router-link v-for="category in albumByCategories" :key="category.id" :to="{ name: 'albums', query: { category: category.title } }" class="block group">
+      <router-link
+        v-for="category in albumByCategories"
+        :key="category.id"
+        :to="{ name: 'albums', query: { category: category.title } }"
+        class="block group"
+      >
         <div class="relative rounded-lg overflow-hidden shadow-md">
           <img
             :src="category.image"

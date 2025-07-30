@@ -101,10 +101,13 @@ const changePage = (page) => {
 }
 
 const storeNewAlbumHandler = () => {
-  // getAllAlbums()
   activeTab.value = 'albums'
-  window.location.reload()
+
+  setTimeout(() => {
+    window.location.reload()
+  }, 50) // kasih delay kecil, 50–100 ms cukup
 }
+
 
 const deleteAlbumHandler = () => {
   // getAllAlbums()
