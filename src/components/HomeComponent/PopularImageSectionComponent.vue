@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const route = useRoute()
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user'))
@@ -35,7 +36,7 @@ const goToUpload = () => {
 
 const getPopularImages = async () => {
   try {
-    const response = await axios.get('http://localhost:3001/api/v1/images/popular')
+    const response = await axios.get(`${API_BASE_URL}/api/v1/images/popular`)
     const featuredImagesData = response.data.images // Assuming the API returns an array of images
 
     featuredImages.value = featuredImagesData.map((img) => ({

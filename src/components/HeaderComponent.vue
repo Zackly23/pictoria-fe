@@ -42,7 +42,7 @@ const signOut = async () => {
     <div class="container mx-auto px-4 py-4">
       <nav class="flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <svg
+          <!-- <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-8 w-8 text-blue-500"
             viewBox="0 0 20 20"
@@ -53,7 +53,9 @@ const signOut = async () => {
               d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
               clip-rule="evenodd"
             />
-          </svg>
+          </svg> -->
+
+          <img src="/pixovault.png" alt="PixoVault Logo" class="h-12 w-12 mr-2" />
           <router-link to="/" class="text-gray-800 text-lg font-semibold">
             <span class="text-xl font-bold text-blue-500">PixoVault</span>
           </router-link>

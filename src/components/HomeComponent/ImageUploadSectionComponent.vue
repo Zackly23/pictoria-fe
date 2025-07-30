@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { ref } from 'vue'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const previewActive = ref(false)
 const fileName = ref('')
 const mediaUrl = ref('') // ini untuk URL hasil upload
@@ -36,7 +37,7 @@ const uploadTemporaryMedia = async () => {
     const formData = new FormData()
     formData.append('media_temp', selectedFile.value)
 
-    const response = await axios.post('http://localhost:3001/api/v1/temp/media', formData, {
+    const response = await axios.post(`${API_BASE_URL}/api/v1/temp/media`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

@@ -1,90 +1,39 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-
-// Image Slideshow
-const imagesSlideShow = ref([
-  {
-    tag: 'Professional Photography',
-    url: 'yifei-wong-SgULpUGB4cA-unsplash.jpg',
-  },
-  {
-    tag: 'Creative Design Work',
-    url: 'husniati-salma-U63WVnKpOws-unsplash.jpg',
-  },
-  {
-    tag: 'Portfolio Showcase',
-    url: 'bradford-zak-l2Z909j1vZE-unsplash.jpg',
-  },
-])
-
-const indexSlideShow = ref(0)
-
-const checkIndexSlide = (index) => indexSlideShow.value === index
-
-onMounted(() => {
-  setInterval(() => {
-    indexSlideShow.value = (indexSlideShow.value + 1) % imagesSlideShow.value.length
-  }, 3000)
-})
-</script>
-
 <template>
-  <!-- Hero Section with Slideshow -->
-  <section class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 md:py-16">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row items-center">
-        <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
-          <h1 class="text-4xl md:text-5xl font-bold mb-6">Store and Share Albums Securely</h1>
-          <p class="text-lg max-w-xl mb-10">
-            Store photos and videos securely in flexible, organized albums. Follow others and
-            control visibility.
-          </p>
+  <section class="bg-blue-600 text-white py-16">
+    <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+      <!-- Text Area -->
+      <div class="md:w-1/2 text-center md:text-left space-y-6">
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+          Store and Share Albums Securely
+        </h1>
+        <p class="text-lg md:text-xl text-white/90 max-w-xl">
+          Upload, organize, and share your photos with ease. Control privacy and collaborate
+          effortlessly.
+        </p>
+        <router-link
+          to="/login"
+          class="bg-white text-blue-600 font-semibold px-6 py-3 rounded-full hover:shadow-lg hover:-translate-y-1 transition"
+        >
+          Try It Now — Free
+        </router-link>
+      </div>
 
-          <a
-            href="#"
-            class="bg-white text-blue-500 px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:-translate-y-1 transition duration-300 inline-block"
-          >
-            Get Started - It’s Free
-          </a>
-        </div>
-
-        <!-- Slideshow -->
-        <div class="md:w-1/2">
-          <div class="relative w-full h-64 md:h-96 rounded-lg overflow-hidden shadow-xl">
-            <div
-              v-for="(image, index) in imagesSlideShow"
-              :key="index"
-              class="absolute w-full h-full transition-opacity duration-1000"
-              :class="checkIndexSlide(index) ? 'opacity-100' : 'opacity-0'"
-            >
-              <img
-                :src="`/src/assets/images/${image.url}`"
-                alt="Image showcase"
-                class="w-full h-full object-cover rounded-lg slideshow-image"
-              />
-              <div
-                class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent"
-              >
-                <p class="text-white font-medium">{{ image.tag }}</p>
-              </div>
-            </div>
-
-            <!-- Navigation Dots -->
-            <div class="absolute bottom-4 right-4 flex space-x-2">
-              <button
-                v-for="(image, index) in imagesSlideShow"
-                :key="index"
-                @click="indexSlideShow = index"
-                class="w-3 h-3 rounded-full focus:outline-none transition-colors duration-200"
-                :class="{
-                  'bg-white': indexSlideShow === index,
-                  'bg-white bg-opacity-50': indexSlideShow !== index,
-                }"
-              ></button>
-            </div>
-          </div>
-        </div>
+      <!-- Video Preview -->
+      <div class="md:w-1/2 w-full rounded-2xl overflow-hidden shadow-2xl">
+        <video autoplay muted loop playsinline class="w-full h-72 md:h-96 object-cover rounded-2xl">
+          <source src="/video_tutorial.webm" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </div>
     </div>
   </section>
 </template>
+
+<script setup>
+const imagesSlideShow = [
+  { tag: 'Professional Photography', url: 'yifei-wong-SgULpUGB4cA-unsplash.jpg' },
+  { tag: 'Creative Design Work', url: 'husniati-salma-U63WVnKpOws-unsplash.jpg' },
+  { tag: 'Portfolio Showcase', url: 'bradford-zak-l2Z909j1vZE-unsplash.jpg' },
+  { tag: 'Organized Albums', url: 'another-image.jpg' },
+]
+</script>
