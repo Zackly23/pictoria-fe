@@ -4,6 +4,8 @@ import axios from 'axios'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 const route = useRoute()
 const router = useRouter()
 const tempMediaId = ref(route.params.id)
@@ -16,7 +18,7 @@ const toggleLike = (index) => {
 
 const getTemporaryMediaUrl = async () => {
   try {
-    const response = await axios.get('http://localhost:3001/api/v1/temp/media', {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/temp/media`, {
       params: { temp_id: tempMediaId.value },
     })
 
