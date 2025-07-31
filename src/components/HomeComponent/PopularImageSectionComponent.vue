@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const API_BASE_URL = import.meta.env.API_BASE_URL
 const route = useRoute()
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user'))
