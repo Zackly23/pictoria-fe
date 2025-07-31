@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { ref } from 'vue'
 
+const FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const previewActive = ref(false)
 const fileName = ref('')
@@ -45,7 +46,7 @@ const uploadTemporaryMedia = async () => {
 
     if (response.status === 200) {
       uploadSuccess.value = true
-      albumImageTempUrl.value = `http://localhost:5173/image/${response.data.temp_media.id}/temp`
+      albumImageTempUrl.value = `${FRONTEND_BASE_URL}/image/${response.data.temp_media.id}/temp`
       // mediaUrl.value = response.data.temp_media.media_url
     } else {
       console.error('Upload failed:', response.statusText)
