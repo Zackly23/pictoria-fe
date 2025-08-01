@@ -234,7 +234,7 @@ onMounted(() => {
           @click-like-media="clickLikeMedia"
         />
       </div>
-      <URLCopyComponent />
+      <URLCopyComponent :album-id="albumID"/>
       <CommentSectionComponent />
     </section>
   </div>

@@ -12,6 +12,7 @@ import NotFound from '@/views/NotFound.vue'
 import Forbidden from '@/views/Forbidden.vue'
 import PricingView from '@/views/PricingView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
+import AuthCallbackSSOView from '@/views/AuthCallbackSSOView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,7 +31,7 @@ const router = createRouter({
         },
 
         {
-          path: '/album/:albumId/details',
+          path: '/albums/:albumId/details',
           name: 'albumDetails',
           component: AlbumDetailView,
           meta: {
@@ -68,6 +69,12 @@ const router = createRouter({
           meta: {
             title: 'Albums - PixoVault',
           },
+        },
+        {
+          path: '/auth/callback',
+          name: 'auth-callback',
+          component: AuthCallbackSSOView,
+          meta: { title: 'SSO Login' },
         },
         {
           path: '/pricing',
