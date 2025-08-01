@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const props = defineProps({
   albumId: {
     type: String,
@@ -14,15 +16,43 @@ const shareLinks = ref({
   iframe: 'https://pixelvault.com/embed/albums/summer-2025',
 })
 
+function sharePage() {
+  const shareData = {
+    title: document.title,
+    text: 'Cek halaman ini!',
+    url: window.location.href,
+  }
+
+  if (navigator.share) {
+    // ✅ MOBILE: Native share sheet
+    navigator.share(shareData).catch((err) => console.warn('Share failed:', err))
+  } else {
+    // 💻 DESKTOP: Fallback (copy to clipboard)
+    navigator.clipboard.writeText(shareData.url).then(() => {
+      alert('URL copied to clipboard!')
+    })
+  }
+}
+
 function copyToClipboard(text) {
   console.log('Copying to clipboard:', text)
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      alert('Copied to clipboard!')
+      toast.add({
+        severity: 'success',
+        summary: 'Copied Successfully',
+        detail: 'URL successfully copied to clipboard.',
+        life: 3000,
+      })
     })
     .catch((err) => {
-      console.error('Failed to copy: ', err)
+      toast.add({
+        severity: 'error',
+        summary: 'Copy Failed',
+        detail: 'Failed to copy the URL. Please try again.',
+        life: 3000,
+      })
     })
 }
 
@@ -65,7 +95,7 @@ function shareOn(platform) {
   <div class="bg-white rounded-lg shadow-md p-6 mb-8">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-semibold">Share Album</h2>
-      <div class="flex items-center space-x-1">
+      <button @click="sharePage" class="flex items-center space-x-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5 text-gray-500"
@@ -81,7 +111,7 @@ function shareOn(platform) {
           />
         </svg>
         <span class="text-sm text-gray-500">Share with friends</span>
-      </div>
+      </button>
     </div>
     <!-- URL Copy Section -->
     <div class="space-y-3 mb-6">
@@ -89,11 +119,11 @@ function shareOn(platform) {
         <input
           type="text"
           readonly
-          :value="`https://pixelvault.site/albums/${props.mediaId}/details`"
+          :value="`https://pixelvault.site/albums/${props.albumId}/details`"
           class="bg-gray-100 px-4 py-3 rounded-l flex-grow focus:outline-none"
         />
         <button
-        @click="copyToClipboard(shareLinks.iframe)"
+          @click="copyToClipboard(`https://pixelvault.site/albums/${props.albumId}/details`)"
           class="bg-blue-500 text-white px-6 py-3 rounded-r hover:bg-blue-600 transition flex items-center"
         >
           <svg
@@ -116,7 +146,6 @@ function shareOn(platform) {
     </div>
 
     <!-- Social Media Sharing -->
-
 
     <!-- QR Code -->
     <!-- <div class="mt-6 flex flex-col sm:flex-row items-center sm:space-x-6">

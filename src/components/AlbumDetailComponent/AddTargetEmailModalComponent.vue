@@ -1,6 +1,9 @@
 <script setup>
 import api from '@/api'
 import { ref, computed } from 'vue'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const props = defineProps({
   albumDetail: {
@@ -35,9 +38,23 @@ const addEmail = async () => {
       console.log('response add email : ', response.data)
       newEmail.value = ''
 
+      toast.add({
+        severity: 'success',
+        summary: 'Email Added Successfully',
+        detail: 'The email was added successfully.',
+        life: 3000,
+      })
+
       emits('update-target-email')
     }
   } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Failed to Add Email',
+      detail: 'The email could not be added. Please try again.',
+      life: 3000,
+    })
+
     console.error('error add email : ', error)
   }
 }
