@@ -115,16 +115,16 @@ function shareOn(platform) {
     </div>
     <!-- URL Copy Section -->
     <div class="space-y-3 mb-6">
-      <div class="flex">
+      <div class="flex w-full overflow-hidden rounded shadow">
         <input
           type="text"
           readonly
           :value="`https://pixelvault.site/albums/${props.albumId}/details`"
-          class="bg-gray-100 px-4 py-3 rounded-l flex-grow focus:outline-none"
+          class="bg-gray-100 px-4 py-3 flex-grow text-sm focus:outline-none"
         />
         <button
           @click="copyToClipboard(`https://pixelvault.site/albums/${props.albumId}/details`)"
-          class="bg-blue-500 text-white px-6 py-3 rounded-r hover:bg-blue-600 transition flex items-center"
+          class="bg-blue-500 text-white px-4 py-3 hover:bg-blue-600 transition flex items-center text-sm whitespace-nowrap"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
