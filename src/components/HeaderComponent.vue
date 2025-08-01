@@ -42,7 +42,6 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
   <header class="bg-white sticky top-0 shadow-sm z-200">
     <div class="container mx-auto px-4 py-4">
@@ -106,7 +105,7 @@ onMounted(() => {
               <div
                 class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold"
               >
-                {{ userProfile?.firstName ?? 'JD' }}
+                {{ userProfile?.first_name[0] + userProfile?.last_name[0] ?? 'JD' }}
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
