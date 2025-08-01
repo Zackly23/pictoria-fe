@@ -356,7 +356,7 @@ onMounted(() => {
   </div>
 
   <!-- Sharing Section -->
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex justify-between items-center mb-6 mt-12">
     <div class="flex-col space-y-2">
       <button
         v-show="
@@ -380,7 +380,7 @@ onMounted(() => {
             d="M16 12H8m4-4v8m7.5-4a9.5 9.5 0 11-19 0 9.5 9.5 0 0119 0z"
           />
         </svg>
-        <span>Tambah Email</span>
+        <span>Add Email</span>
       </button>
 
       <!-- <div class="flex items-center space-x-1">

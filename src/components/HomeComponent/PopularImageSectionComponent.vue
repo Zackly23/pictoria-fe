@@ -73,7 +73,7 @@ onMounted(() => {
         class="overflow-hidden rounded-lg bg-white shadow-sm p-2"
         :class="{ 'md:col-span-2': index === 4 }"
       >
-        <router-link :to="`/album/${img.albumId}/details`" class="block">
+        <router-link :to="`/albums/${img.albumId}/details`" class="block">
           <img
             :src="img.image.src"
             alt="Featured image"

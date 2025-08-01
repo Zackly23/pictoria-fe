@@ -47,7 +47,7 @@ const router = createRouter({
           },
         },
         {
-          path: '/album/:albumId/edit',
+          path: '/albums/:albumId/edit',
           name: 'album-edit',
           component: UploadSectionView,
           meta: {

@@ -248,7 +248,7 @@ console.log('ada file : ', props.albums.files)
           <img :src="album.coverImage" alt="Album cover" class="w-full h-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
           <div class="absolute bottom-0 left-0 p-4">
-            <router-link :to="`/album/${album.id}/details`">
+            <router-link :to="`/albums/${album.id}/details`">
               <h3 class="text-white text-xl font-bold">{{ album.title }}</h3>
             </router-link>
             <!-- <p class="text-gray-200">{{ album.photoCount }} Media</p> -->
@@ -304,7 +304,7 @@ console.log('ada file : ', props.albums.files)
             <span class="text-gray-500 text-sm">Updated {{ album.updatedAt }}</span>
             <div class="flex space-x-2">
               <router-link
-                :to="`/album/${album.id}/edit`"
+                :to="`/albums/${album.id}/edit`"
                 class="text-gray-500 hover:text-blue-500"
               >
                 <svg

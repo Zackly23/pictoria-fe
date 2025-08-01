@@ -42,7 +42,7 @@ onMounted(() => {
       <img :src="album.coverImage" alt="Album cover" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
       <div class="absolute bottom-0 left-0 p-4">
-        <router-link :to="`/album/${album.id}/details`">
+        <router-link :to="`/albums/${album.id}/details`">
           <h3 class="text-white text-xl font-bold hover:underline">
             {{ album.title }}
           </h3>

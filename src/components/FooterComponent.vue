@@ -1,3 +1,10 @@
+<script setup>
+const openContact = () => {
+  window.location.href = 'mailto:support@pixovault.com'
+}
+
+
+</script>
 <template>
   <footer class="bg-gray-800 text-white pt-16 pb-8">
     <div class="container mx-auto px-4">
@@ -7,7 +14,7 @@
           <ul class="space-y-2">
             <li><a href="#" class="text-gray-300 hover:text-white transition">About Us</a></li>
             <li><a href="#" class="text-gray-300 hover:text-white transition">Our Team</a></li>
-            <!-- <li><a href="#" class="text-gray-300 hover:text-white transition">Careers</a></li> -->
+            <li><button @click="openContact" class="text-gray-300 hover:text-white transition">Contact</button></li>
             <li><a href="#" class="text-gray-300 hover:text-white transition">Press</a></li>
           </ul>
         </div>
@@ -55,7 +62,3 @@
     </div>
   </footer>
 </template>
-
-<script setup>
-// Tidak ada logic khusus
-</script>
