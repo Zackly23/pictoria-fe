@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 const props = defineProps({
-  tempMediaId: {
+  albumId: {
     type: String,
     required: true,
   },
@@ -89,7 +89,7 @@ function shareOn(platform) {
         <input
           type="text"
           readonly
-          :value="`https://pixelvault.site/image/${props.tempMediaId}/temp`"
+          :value="`https://pixelvault.site/albums/${props.mediaId}/details`"
           class="bg-gray-100 px-4 py-3 rounded-l flex-grow focus:outline-none"
         />
         <button

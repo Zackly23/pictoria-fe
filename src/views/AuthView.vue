@@ -354,7 +354,6 @@ onUnmounted(() => {
                 <!-- ... (keep login form content here) -->
                 <div class="mb-6 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                   <button
-                    :disable="true"
                     @click="loginWithGoogle"
                     class="flex items-center justify-center bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition w-full cursor-not-allowed pointer-events-none"
                   >
