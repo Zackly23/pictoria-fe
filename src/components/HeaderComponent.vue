@@ -1,41 +1,47 @@
 <script setup>
-// Tidak ada logic khusus
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/api'
 
 const authStore = useAuthStore()
 
 const open = ref(false)
-const isLogin = ref(JSON.parse(localStorage.getItem('user')) ? true : false)
-const userProfile = ref(JSON.parse(localStorage.getItem('user')))
+
+// Ambil dari authStore secara reactive
+const isLogin = computed(() => authStore.isLogin)
+const userProfile = computed(() => authStore.user)
 
 const openContact = () => {
   window.location.href = 'mailto:support@pixovault.com'
 }
 
 const signOut = async () => {
-  console.log('Signing out...')
   try {
-    // Kirim permintaan logout ke server
     const response = await api.post('/logout', {}, { skipAuthErrorHandler: true })
 
-    // Bersihkan data autentikasi dari localStorage
     if (response.status === 200) {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
 
+      authStore.logout() // clear store juga
+
       window.location.href = '/'
     }
-
-    // Redirect ke halaman beranda
-    // window.location.href = '/';
   } catch (error) {
     console.error(error.response?.data || error.message)
   }
 }
+
+// Optional: sync authStore from localStorage on mount
+onMounted(() => {
+  const user = JSON.parse(localStorage.getItem('user'))
+  if (user) {
+    authStore.setUser(user)
+  }
+})
 </script>
+
 
 <template>
   <header class="bg-white sticky top-0 shadow-sm z-200">

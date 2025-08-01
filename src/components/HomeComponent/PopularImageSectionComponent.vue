@@ -1,12 +1,14 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
-const user = JSON.parse(localStorage.getItem('user'))
+const user = computed(() => authStore.user)
 const featuredImages = ref([
   {
     albumId: null,

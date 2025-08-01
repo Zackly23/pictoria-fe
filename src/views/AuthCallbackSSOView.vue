@@ -22,10 +22,10 @@ const userProfile = ref({
   is_two_factor_enabled: '',
 })
 
-const getUserProfile = async () => {
+const getUserProfile = async (userDataID) => {
   try {
     // Simulate an API call to fetch user profile
-    const response = await api.get(`/users/${userDataID.value}`)
+    const response = await api.get(`/users/${userDataID}`)
 
     console.log('User Profile: ', response.data)
 
@@ -42,7 +42,7 @@ const getUserProfile = async () => {
     userProfile.value.is_two_factor_enabled = users.is_two_factor_enabled
 
     if (response.status === 200) {
-      authStore.setUser(JSON.stringify(userProfile.value))
+      authStore.setUser(userProfile.value)
 
       return true
     }
@@ -52,6 +52,7 @@ const getUserProfile = async () => {
     return false
   }
 }
+
 onMounted(async () => {
   const access_token = route.query.access_token
   const refresh_token = route.query.refresh_token
@@ -63,26 +64,38 @@ onMounted(async () => {
       localStorage.setItem('refresh_token', refresh_token)
 
       const success = await getUserProfile(user_id)
+
       if (success) {
-        if (localStorage.getItem('last_visited_page')) {
-          console.log(
-            'Redirecting to last visited page... : ',
-            localStorage.getItem('last_visited_page'),
-          )
-          router.push(localStorage.getItem('last_visited_page'))
+        const last_visit = localStorage.getItem('last_visited_page')
+
+        // Cegah redirect ke halaman ini sendiri (misal: "/auth/callback")
+        const thisPagePath = route.fullPath
+
+        if (
+          last_visit &&
+          last_visit !== '/login' &&
+          last_visit !== '/signup' &&
+          last_visit !== thisPagePath
+        ) {
+          console.log('Redirecting to last visited page... : ', last_visit)
+        //   localStorage.removeItem('last_visited_page') // clear to avoid loop
+          router.push(last_visit)
         } else {
           console.log('Redirecting to home page...')
 
           router.push({
             name: 'profile',
-            params: userProfile.value.id,
-            query: 'albums',
-          }) // Redirect ke halaman utama jika sukses
+            params: {
+              userId: userProfile.value.id,
+            },
+            query: { activeTab: 'albums' },
+          })
         }
       } else {
-        console.error('Login failed. Redirecting to login page...', error)
-        router.push('/login') // Redirect ke halaman login jika gagal
+        console.error('Login failed. Redirecting to login page...')
+        router.push('/login')
       }
+      
     } catch (error) {
       console.error('Login Error:', error)
       errorMessage.value = 'Login failed. Please try again.'
