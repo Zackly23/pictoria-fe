@@ -249,7 +249,7 @@ const props = defineProps({
 
                     <div>
                       <router-link
-                        :to="'/album/' + album.id + '/details'"
+                        :to="'/albums/' + album.id + '/details'"
                         class="group-hover:text-indigo-600"
                       >
                         <span
