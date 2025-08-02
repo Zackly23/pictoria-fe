@@ -105,7 +105,8 @@ onMounted(() => {
               <div
                 class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold"
               >
-                {{ userProfile?.first_name[0] + userProfile?.last_name[0] ?? 'JD' }}
+
+                {{ userProfile?.first_name[0] + userProfile?.last_name[0] ?? 'PV' }}
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
