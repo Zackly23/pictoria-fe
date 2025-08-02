@@ -42,7 +42,6 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
   <header class="bg-white sticky top-0 shadow-sm z-200">
     <div class="container mx-auto px-4 py-4">
@@ -106,6 +105,7 @@ onMounted(() => {
               <div
                 class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold"
               >
+
                 {{ userProfile?.first_name[0] + userProfile?.last_name[0] ?? 'PV' }}
               </div>
               <svg
@@ -145,7 +145,7 @@ onMounted(() => {
                 >Settings</router-link
               >
               <router-link
-                to=""
+                to="/pricing"
                 class="md:hidden block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
                 >Pricing</router-link
               >

@@ -27,6 +27,12 @@ const deleteAlbum = async () => {
 
       if (response.status === 200) {
         console.log('response delete : ', response.data)
+        toast.add({
+          severity: 'success',
+          summary: 'Delete Success',
+          detail: 'Album deleted successfully.',
+          life: 3000,
+        })
         emits('delete-album-handler')
       }
     } else {

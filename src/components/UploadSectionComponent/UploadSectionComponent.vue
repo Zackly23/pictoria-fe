@@ -9,6 +9,10 @@ const toast = useToast()
 const errorsAlbumUpload = ref()
 const emits = defineEmits(['store-new-album-handler'])
 const props = defineProps({
+  userData: {
+    type: Object,
+    required: true,
+  },
   userDataId: {
     type: String,
     required: true,
@@ -59,8 +63,8 @@ const storeNewAlbum = async () => {
 
       toast.add({
         severity: 'warn',
-        summary: 'Validasi Gagal',
-        detail: 'Mohon isi data album dengan benar.',
+        summary: 'Validation Failed',
+        detail: 'Please fill in the album data correctly.',
         life: 3000,
       })
 
@@ -113,8 +117,8 @@ const storeNewAlbum = async () => {
       console.log('to albun sadada')
       toast.add({
         severity: 'success',
-        summary: 'Album Tersimpan',
-        detail: 'Album berhasil disimpan.',
+        summary: 'Album Saved',
+        detail: 'Album has been saved successfully.',
         life: 3000,
       })
 
@@ -126,8 +130,8 @@ const storeNewAlbum = async () => {
     if (error.response && error.response.status === 413) {
       toast.add({
         severity: 'error',
-        summary: 'Upload Gagal',
-        detail: 'Ukuran file terlalu besar. Maksimal 10MB per file.',
+        summary: 'Upload Failed',
+        detail: 'File size is too large.',
         life: 3000,
       })
       return
@@ -135,16 +139,15 @@ const storeNewAlbum = async () => {
       // Handle validation errors
       toast.add({
         severity: 'warn',
-        summary: 'Kapasitas Penuh',
-        detail:
-          'Kapasitas album sudah penuh. Silakan hapus beberapa file sebelum mengunggah yang baru.',
+        summary: 'Storage Full',
+        detail: 'Album storage is full. Please delete some files before uploading new ones.',
         life: 3000,
       })
     } else {
       toast.add({
         severity: 'error',
-        summary: 'Upload Gagal',
-        detail: 'Kesalahan Menyimpan Album.',
+        summary: 'Upload Failed',
+        detail: 'Error Saving Album.',
         life: 3000,
       })
     }
@@ -154,17 +157,28 @@ const storeNewAlbum = async () => {
 function handleFileChange(e) {
   const inputFiles = Array.from(e.target.files)
   inputFiles.forEach((file, index) => {
-    const isImage = file.type.startsWith('image/')
-    files.value.push({
-      id: Date.now() + index,
-      name: file.name,
-      type: isImage ? 'image' : 'video',
-      size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-      url: URL.createObjectURL(file),
-      raw: file,
-      description: '', // Add a description field for each file
-      new: true,
-    })
+    let maxSizeBytes = parseInt(props.userData?.maximum_media_size ?? 0, 10)
+
+    if (file && file.size > maxSizeBytes) {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Failed',
+        detail: `File size is too large. Maximum allowed is ${props.userData?.maximum_media_size_string} per file.`,
+        life: 3000,
+      })
+    } else {
+      const isImage = file.type.startsWith('image/')
+      files.value.push({
+        id: Date.now() + index,
+        name: file.name,
+        type: isImage ? 'image' : 'video',
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+        url: URL.createObjectURL(file),
+        raw: file,
+        description: '', // Add a description field for each file
+        new: true,
+      })
+    }
   })
 }
 
@@ -209,6 +223,8 @@ function removeTargetEmail(email) {
 const filteredTargetEmails = computed(() =>
   availableTags.value.filter((tag) => !selectedTags.value.includes(tag)),
 )
+
+console.log('di uploadsectioncomponent : ', props.userData)
 </script>
 
 <template>
@@ -252,10 +268,14 @@ const filteredTargetEmails = computed(() =>
           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
         />
       </svg>
-      <h3 class="text-lg font-medium mb-2">Drag and drop your images here</h3>
+      <h3 class="text-lg font-medium mb-2">Drag and drop your media here</h3>
       <p class="text-gray-500 mb-4">or click to browse files</p>
-      <p class="text-gray-400 text-sm">Supported formats: JPEG, PNG, GIF, WebP</p>
-      <p class="text-gray-400 text-sm">Maximum file size: 10MB per image</p>
+      <p class="text-gray-400 text-sm">
+        Supported formats: JPEG, PNG, GIF, WebP, MP4, MOV, WEBMP, etc
+      </p>
+      <p class="text-gray-400 text-sm">
+        Maximum file size: {{ props.userData?.maximumMediaSizeString }} per media
+      </p>
     </div>
   </div>
 

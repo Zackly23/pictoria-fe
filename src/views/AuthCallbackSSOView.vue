@@ -20,6 +20,7 @@ const userProfile = ref({
   phone: '',
   deactivate_until: '',
   is_two_factor_enabled: '',
+  maximum_media_size: '',
 })
 
 const getUserProfile = async (userDataID) => {
@@ -40,6 +41,7 @@ const getUserProfile = async (userDataID) => {
     userProfile.value.address = users.address
     userProfile.value.deactivate_until = users.deactivate_until
     userProfile.value.is_two_factor_enabled = users.is_two_factor_enabled
+    userProfile.value.maximum_media_size = users.maximum_media_size
 
     if (response.status === 200) {
       authStore.setUser(userProfile.value)

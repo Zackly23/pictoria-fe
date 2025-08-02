@@ -7,6 +7,9 @@ import ResetPasswordModalComponent from './ResetPasswordModalComponent.vue'
 import TwoFactorAuthModalComponent from './TwoFactorAuthModalComponent.vue'
 import DeactivateAccountModalComponent from './DeactivateAccountModalComponent.vue'
 import DeleteAccountModalComponent from './DeleteAccountModalComponent.vue'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const countries = ref(countriesData)
 const TFAEnabled = ref(true)

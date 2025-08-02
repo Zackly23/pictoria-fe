@@ -19,7 +19,7 @@ const shareLinks = ref({
 function sharePage() {
   const shareData = {
     title: document.title,
-    text: 'Cek halaman ini!',
+    text: 'Check out this amazing album!',
     url: window.location.href,
   }
 
