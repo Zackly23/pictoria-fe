@@ -1,9 +1,12 @@
 <script setup>
 import api from '@/api'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const toast = useToast()
+const userData = computed(() => authStore.user)
 
 const previewActive = ref(false)
 const file = ref({
@@ -38,20 +41,31 @@ const closeModal = () => {
 
 const handleFileChange = (event) => {
   const media = event.target.files[0]
-  const isImage = media.type.startsWith('image/')
 
-  file.value.raw = media
-  file.value.type = isImage ? 'image' : 'video'
+  const maxSizeBytes = parseInt(userData.value?.maximum_media_size ?? 0, 10)
+  if (media && media.size > maxSizeBytes) {
+    toast.add({
+      severity: 'error',
+      summary: 'Upload Failed',
+      detail: `File size is too large. Maximum allowed is ${userData.value?.maximum_media_size_string} per file.`,
+      life: 3000,
+    })
+  } else {
+    const isImage = media.type.startsWith('image/')
 
-  mediaTypePrev.value = isImage ? 'image' : 'video'
+    file.value.raw = media
+    file.value.type = isImage ? 'image' : 'video'
 
-  console.log('file new album : ', file.value)
-  console.log('description : ', mediaDescription.value)
+    mediaTypePrev.value = isImage ? 'image' : 'video'
 
-  if (file.value) {
-    fileName.value = media.name
-    previewActive.value = true
-    mediaUrl.value = URL.createObjectURL(media) // simulasikan URL preview
+    console.log('file new album : ', file.value)
+    console.log('description : ', mediaDescription.value)
+
+    if (file.value) {
+      fileName.value = media.name
+      previewActive.value = true
+      mediaUrl.value = URL.createObjectURL(media) // simulasikan URL preview
+    }
   }
 }
 
@@ -105,8 +119,8 @@ const uploadMedia = async () => {
     if (error.response && error.response.status === 413) {
       toast.add({
         severity: 'error',
-        summary: 'Upload Gagal',
-        detail: 'Ukuran file terlalu besar. Maksimal 10MB per file.',
+        summary: 'Upload Failed',
+        detail: `File size is too large. Maximum allowed is ${userData.value?.maximum_media_size_string} per file.`,
         life: 3000,
       })
       return
@@ -114,16 +128,15 @@ const uploadMedia = async () => {
       // Handle validation errors
       toast.add({
         severity: 'warn',
-        summary: 'Kapasitas Penuh',
-        detail:
-          'Kapasitas album sudah penuh. Silakan hapus beberapa file sebelum mengunggah yang baru.',
+        summary: 'Storage Full',
+        detail: 'Album storage is full. Please delete some files before uploading new ones.',
         life: 3000,
       })
     } else {
       toast.add({
         severity: 'error',
-        summary: 'Upload Gagal',
-        detail: 'Kesalahan Menyimpan Album.',
+        summary: 'Upload Failed',
+        detail: 'Error saving album.',
         life: 3000,
       })
     }
@@ -160,7 +173,7 @@ const uploadMedia = async () => {
           @click="$refs.fileInput.click()"
         >
           <div class="text-4xl text-blue-500 mb-4 text-center">📁</div>
-          <p class="text-lg text-gray-600 mb-2 text-center">Drag & Drop your image here</p>
+          <p class="text-lg text-gray-600 mb-2 text-center">Drag & Drop your media here</p>
           <p class="text-sm text-gray-500 text-center">or click to browse files</p>
           <input
             type="file"
@@ -201,7 +214,7 @@ const uploadMedia = async () => {
               <video
                 v-else-if="mediaTypePrev === 'video'"
                 controls
-                class="w-full h-40 object-cover"
+                class="w-full h-70 object-fit"
                 :src="mediaUrl"
               ></video>
             </div>

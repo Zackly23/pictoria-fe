@@ -121,6 +121,7 @@ const getSubscriptionHistories = async () => {
         start_date: filters.value.startDate,
         end_date: filters.value.endDate,
         search: filters.value.search,
+        sort_by: filters.value.sort,
       },
     })
 
@@ -439,26 +440,28 @@ onMounted(() => {
               />
             </div>
 
-            <!-- Filter tengah: Dropdown -->
-            <div>
-              <select
-                v-model="filters.sort"
-                class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
-              >
-                <option disabled value="">Urutkan</option>
-                <option value="latest">Terbaru</option>
-                <option value="oldest">Terlama</option>
-              </select>
-            </div>
+            <div class="flex item-center justify-center space-x-6">
+              <!-- Filter tengah: Dropdown -->
+              <div>
+                <select
+                  v-model="filters.sort"
+                  class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+                >
+                  <option disabled value="">Sort by</option>
+                  <option value="recent">Recent</option>
+                  <option value="oldest">Oldest</option>
+                </select>
+              </div>
 
-            <!-- Filter kanan: Search input -->
-            <div class="flex-1 sm:flex-initial">
-              <input
-                v-model="filters.search"
-                type="text"
-                placeholder="Cari album..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <!-- Filter kanan: Search input -->
+              <div class="flex-1 sm:flex-initial">
+                <input
+                  v-model="filters.search"
+                  type="text"
+                  placeholder="Cari album..."
+                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>

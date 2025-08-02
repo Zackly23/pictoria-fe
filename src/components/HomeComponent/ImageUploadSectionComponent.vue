@@ -1,6 +1,9 @@
 <script setup>
 import axios from 'axios'
 import { ref } from 'vue'
+import { useToast } from 'primevue'
+
+const toast = useToast()
 
 const FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -20,16 +23,25 @@ const selectedFile = ref(null) // untuk menyimpan File
 const handleFileChange = (event) => {
   const file = event.target.files[0]
   console.log('Selected file:', file)
+  let maxSizeBytes = 10 * 1024 * 1024
+  if (file && file.size > maxSizeBytes) {
+    toast.add({
+      severity: 'error',
+      summary: 'Upload Gagal',
+      detail: `Ukuran file terlalu besar`,
+      life: 3000,
+    })
+  } else {
+    if (file) {
+      selectedFile.value = file // Simpan filenya di ref yang berbeda
+      fileName.value = file.name
+      previewActive.value = true
+      mediaUrl.value = URL.createObjectURL(file)
+      copied.value = false
+      mediaTypePrev.value = file.type.startsWith('image/') ? 'image' : 'video'
 
-  if (file) {
-    selectedFile.value = file // Simpan filenya di ref yang berbeda
-    fileName.value = file.name
-    previewActive.value = true
-    mediaUrl.value = URL.createObjectURL(file)
-    copied.value = false
-    mediaTypePrev.value = file.type.startsWith('image/') ? 'image' : 'video'
-
-    console.log('Selected file saved in ref:', selectedFile.value)
+      console.log('Selected file saved in ref:', selectedFile.value)
+    }
   }
 }
 
@@ -134,7 +146,9 @@ const copyToClipboard = async () => {
                 :src="mediaUrl"
               ></video>
             </div>
-            <p class="text-red-400 text-sm mb-2 text-bold">Your image will only be available for 30 minutes</p>
+            <p class="text-red-400 text-sm mb-2 text-bold">
+              Your image will only be available for 30 minutes
+            </p>
             <div>
               <button
                 @click="uploadTemporaryMedia"

@@ -156,8 +156,13 @@ console.log('user has follow : ', props.userProfile.areYouFollowedByUserLooking)
             </div>
           </div>
           <p class="text-gray-600 mb-4">
-            {{ props.userProfile.jobTitle }} • {{ props.userProfile.city }},
-            {{ props.userProfile.state }}
+            {{ props.userProfile.jobTitle }}
+            <span v-if="props.userProfile?.jobTitle && props.userProfile?.city"> • </span>
+            <span v-if="props.userProfile?.state">{{
+              props.userProfile.city + ', ' + props.userProfile.state
+            }}</span>
+
+            <span v-else>{{ props.userProfile?.city }}</span>
           </p>
           <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
             <span

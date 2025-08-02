@@ -5,8 +5,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { validateAlbumUpload } from '@/validations/AlbumValidation'
 import api from '@/api'
 import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const toast = useToast()
+const userData = computed(() => authStore.user)
+
 const errorsAlbumUpload = ref()
 const router = useRouter()
 const route = useRoute()
@@ -24,31 +28,20 @@ const albumID = route.params.albumId
 
 const albums = ref({
   id: 1,
-  title: 'Kabar Mentari',
-  tags: ['Nature', 'Travel', 'Family'],
-  privacy: 'restricted',
-  description: 'Ini adalah deskripsi terkait album yang nantinya menjelaskan ',
-  targetEmails: ['daviddwinugraha2@gmail.com', 'abigailevajayawardhana@gmail.com'],
+  title: '',
+  tags: [],
+  privacy: '',
+  description: '',
+  targetEmails: [],
   files: [
     {
       id: 1,
-      name: 'Kebuutan HAh.png',
-      size: '100 MB',
-      url: 'google.com',
+      name: '',
+      size: '',
+      url: '',
       raw: null,
-      type: 'image',
-      description: 'mama mia', // Add a description field for each file
-      new: false,
-      status: '',
-    },
-    {
-      id: 2,
-      name: 'Kebuutan HAh.png',
-      size: '100 MB',
-      url: 'google.com',
-      raw: null,
-      type: 'image',
-      description: 'lezatos', // Add a description field for each file
+      type: '',
+      description: '', // Add a description field for each file
       new: false,
       status: '',
     },
@@ -138,8 +131,8 @@ const updateAlbum = async () => {
 
       toast.add({
         severity: 'warn',
-        summary: 'Validasi Gagal',
-        detail: 'Mohon isi data album dengan benar.',
+        summary: 'Validation Failed',
+        detail: 'Please fill in the album data correctly.',
         life: 3000,
       })
 
@@ -218,10 +211,11 @@ const updateAlbum = async () => {
     if (response.status === 202) {
       toast.add({
         severity: 'success',
-        summary: 'Album Diperbarui',
-        detail: 'Album berhasil diperbarui.',
+        summary: 'Album Updated',
+        detail: 'The album has been successfully updated.',
         life: 3000,
       })
+
       console.log('response update : ', response.data)
 
       router.push(`/profile/${user.id}`)
@@ -231,25 +225,25 @@ const updateAlbum = async () => {
     if (error.response && error.response.status === 413) {
       toast.add({
         severity: 'error',
-        summary: 'Upload Gagal',
-        detail: 'Ukuran file terlalu besar. Maksimal 10MB per file.',
+        summary: 'Upload Failed',
+        detail: `File size is too large. Maximum allowed is ${userData.value?.maximum_media_size_string} per file.`,
         life: 3000,
       })
+
       return
     } else if (error.response && error.response.status === 451) {
       // Handle validation errors
       toast.add({
         severity: 'warn',
-        summary: 'Kapasitas Penuh',
-        detail:
-          'Kapasitas album sudah penuh. Silakan hapus beberapa file sebelum mengunggah yang baru.',
+        summary: 'Storage Full',
+        detail: 'Album storage is full. Please delete some files before uploading new ones.',
         life: 3000,
       })
     } else {
       toast.add({
         severity: 'error',
-        summary: 'Upload Gagal',
-        detail: 'Kesalahan Menyimpan Album.',
+        summary: 'Upload Failed',
+        detail: 'Error saving album.',
         life: 3000,
       })
     }
@@ -260,27 +254,37 @@ const handleFileChange = (e) => {
   console.log('handle file change : ', e)
   const inputFiles = Array.from(e.target.files)
   inputFiles.forEach((file, index) => {
-    const isImage = file.type.startsWith('image/')
-    const newFile = {
-      id: uuidv4(),
-      name: file.name,
-      type: isImage ? 'image' : 'video', // <--- ini penting!
-      size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-      url: URL.createObjectURL(file),
-      raw: file,
-      description: '',
-      new: true,
-      status: 'new',
+    let maxSizeBytes = parseInt(userData.value?.maximum_media_size ?? 0, 10)
+    if (file && file.size > maxSizeBytes) {
+      toast.add({
+        severity: 'error',
+        summary: 'Upload Failed',
+        detail: `File size is too large. Maximum allowed is ${userData.value?.maximum_media_size_string} per file.`,
+        life: 3000,
+      })
+    } else {
+      const isImage = file.type.startsWith('image/')
+      const newFile = {
+        id: uuidv4(),
+        name: file.name,
+        type: isImage ? 'image' : 'video', // <--- ini penting!
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+        url: URL.createObjectURL(file),
+        raw: file,
+        description: '',
+        new: true,
+        status: 'new',
+      }
+
+      albumBucket.value.push(newFile)
+
+      albums.value.files.push(newFile)
+
+      // console.log('file : ', file)
+      // console.log('file url : ', URL.createObjectURL(file))
+
+      console.log('handle bucket album : ', albumBucket.value)
     }
-
-    albumBucket.value.push(newFile)
-
-    albums.value.files.push(newFile)
-
-    // console.log('file : ', file)
-    // console.log('file url : ', URL.createObjectURL(file))
-
-    console.log('handle bucket album : ', albumBucket.value)
   })
 }
 
@@ -366,6 +370,7 @@ const checkDescriptionChange = (file) => {
   console.log('update album media bucket : ', albumBucket.value)
 }
 
+console.log('usefadata : ', userData)
 onMounted(() => {
   // albums.value.files.forEach((file) => {
   //   originalDescriptions.value[file.id] = file.description
@@ -412,10 +417,14 @@ onMounted(() => {
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        <h3 class="text-lg font-medium mb-2">Drag and drop your images here</h3>
+        <h3 class="text-lg font-medium mb-2">Drag and drop your media here</h3>
         <p class="text-gray-500 mb-4">or click to browse files</p>
-        <p class="text-gray-400 text-sm">Supported formats: JPEG, PNG, GIF, WebP</p>
-        <p class="text-gray-400 text-sm">Maximum file size: 10MB per image</p>
+        <p class="text-gray-400 text-sm">
+          Supported formats: JPEG, PNG, GIF, WebP, MP4, MOV, WEBMP
+        </p>
+        <p class="text-gray-400 text-sm">
+          Maximum file size: {{ userData?.maximum_media_size_string }} per media
+        </p>
       </div>
     </div>
 

@@ -161,12 +161,13 @@ const userLogin = async () => {
     })
 
     if (response.status === 200) {
+      
       user.value = response.data.user
       accessToken.value = response.data.access_token
       refreshToken.value = response.data.refresh_token
 
       const isTFAactive = user.value.is_two_factor_enabled
-
+      console.log('user value bos: ', user.value)
       if (isTFAactive) {
         totpModalOpen.value = true
       } else {

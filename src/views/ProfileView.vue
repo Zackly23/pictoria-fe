@@ -49,6 +49,8 @@ const userProfile = ref({
   avatar: '',
   bio: '',
   areYouFollowedByUserLooking: false,
+  maximumMediaSizeString: '',
+  maximumMediaSize: 0,
   tags: [],
   socialMedias: {
     instagram: '',
@@ -117,7 +119,7 @@ const deleteAlbumHandler = () => {
   toast.add({
     severity: 'success',
     summary: 'Delete Success',
-    detail: 'Album deleted successfully.',
+    detail: 'Album Deleted Successfully.',
     life: 3000,
   })
 }
@@ -218,6 +220,8 @@ const getUserProfile = async () => {
     userProfile.value.bio = users.bio
     userProfile.value.areYouFollowedByUserLooking = users.are_you_following_user
     userProfile.value.tags = users.tag_preferences || []
+    userProfile.value.maximumMediaSize = users.maximum_media_size
+    userProfile.value.maximumMediaSizeString = users.maximum_media_size_string
     userProfile.value.socialMedias = {
       instagram: users.social_media?.instagram,
       facebook: users.social_media?.facebook,
@@ -416,6 +420,7 @@ onMounted(() => {
     <div v-show="activeTab === 'upload'">
       <div class="px-2">
         <UploadSectionComponent
+          :user-data="userProfile"
           :user-data-id="userDataID"
           :is-user-has-same-id="isUserHasSameId"
           @store-new-album-handler="storeNewAlbumHandler"

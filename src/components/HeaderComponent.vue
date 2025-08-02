@@ -144,7 +144,7 @@ onMounted(() => {
                 >Settings</router-link
               >
               <router-link
-                to=""
+                to="/pricing"
                 class="md:hidden block px-4 py-2 text-gray-700 hover:bg-blue-100 font-medium"
                 >Pricing</router-link
               >
