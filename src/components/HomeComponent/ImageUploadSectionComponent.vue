@@ -72,7 +72,7 @@ const uploadTemporaryMedia = async () => {
 const resetPreview = () => {
   previewActive.value = false
   fileName.value = ''
-  imageUrl.value = ''
+  // imageUrl.value = ''
   copied.value = false
   uploadSuccess.value = false
 }
