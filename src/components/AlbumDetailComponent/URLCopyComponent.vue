@@ -119,11 +119,11 @@ function shareOn(platform) {
         <input
           type="text"
           readonly
-          :value="`https://pixelvault.site/albums/${props.albumId}/details`"
+          :value="`https://pixovault.site/albums/${props.albumId}/details`"
           class="bg-gray-100 px-4 py-3 flex-grow text-sm focus:outline-none"
         />
         <button
-          @click="copyToClipboard(`https://pixelvault.site/albums/${props.albumId}/details`)"
+          @click="copyToClipboard(`https://pixovault.site/albums/${props.albumId}/details`)"
           class="bg-blue-500 text-white px-4 py-3 hover:bg-blue-600 transition flex items-center text-sm whitespace-nowrap"
         >
           <svg
