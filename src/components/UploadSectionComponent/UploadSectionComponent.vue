@@ -157,13 +157,15 @@ const storeNewAlbum = async () => {
 function handleFileChange(e) {
   const inputFiles = Array.from(e.target.files)
   inputFiles.forEach((file, index) => {
-    let maxSizeBytes = parseInt(props.userData?.maximum_media_size ?? 0, 10)
-
+    let maxSizeBytes = parseInt(props.userData?.maximumMediaSize ?? 0, 10)
+    console.log("size file : ", file.size)
+    console.log('props user : ', props.userData)
+    console.log("max : ", maxSizeBytes)
     if (file && file.size > maxSizeBytes) {
       toast.add({
         severity: 'error',
         summary: 'Upload Failed',
-        detail: `File size is too large. Maximum allowed is ${props.userData?.maximum_media_size_string} per file.`,
+        detail: `File size is too large. Maximum allowed is ${props.userData?.maximumMediaSizeString} per file.`,
         life: 3000,
       })
     } else {
