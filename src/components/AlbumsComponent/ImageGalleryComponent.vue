@@ -29,7 +29,7 @@ const props = defineProps({
     >
       <template v-for="album in albums" :key="album.id">
         <div class="bg-white rounded-lg overflow-hidden shadow-md album-card">
-          <router-link :to="'/album/' + album.id + '/details'">
+          <router-link :to="'/albums/' + album.id + '/details'">
             <div class="relative group">
               <img
                 :src="album.url"
@@ -43,7 +43,7 @@ const props = defineProps({
           </router-link>
           <!-- <img :src="album.url" :alt="album.name" class="w-full h-48 object-cover" /> -->
           <div class="p-4">
-            <router-link :to="'/album/' + album.id + '/details'">
+            <router-link :to="'/albums/' + album.id + '/details'">
               <div class="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
