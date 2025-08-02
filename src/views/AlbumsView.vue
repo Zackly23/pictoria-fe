@@ -9,6 +9,7 @@ import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import router from '@/router'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const route = useRoute()
 const searchQuery = ref('')
 const viewMode = ref('grid')
@@ -66,7 +67,7 @@ const getAllPublicAlbum = async () => {
   })
 
   try {
-    const response = await axios.get('http://127.0.0.1:3001/api/v1/category/albums', {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/category/albums`, {
       params: {
         page: currentPageNumber.value,
         limit: 12,
