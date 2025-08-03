@@ -32,7 +32,7 @@ const passwordSignup = ref('')
 const confirmPassword = ref('')
 const firstName = ref('')
 const lastName = ref('')
-const rememberMe = ref(true)
+// const rememberMe = ref(true)
 const termsAccepted = ref(false)
 
 const showCurrentPasswordLogin = ref(false)
@@ -496,15 +496,15 @@ onUnmounted(() => {
                     </p>
                   </div>
 
-                  <div class="mb-6 flex items-center">
-                    <input
-                      type="checkbox"
-                      id="remember"
-                      v-model="rememberMe"
-                      class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 rounded"
-                    />
-                    <label for="remember" class="ml-2 block text-gray-700">Remember me</label>
-                  </div>
+                    <!-- <div class="mb-6 flex items-center">
+                      <input
+                        type="checkbox"
+                        id="remember"
+                        v-model="rememberMe"
+                        class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 rounded"
+                      />
+                      <label for="remember" class="ml-2 block text-gray-700">Remember me</label>
+                    </div> -->
 
                   <VueTurnstile v-model="token" site-key="0x4AAAAAABmjNUYaqKXVSQ7C" />
 
