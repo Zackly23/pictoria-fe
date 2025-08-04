@@ -1,5 +1,8 @@
 <script setup>
-const user = JSON.parse(localStorage.getItem('user'))
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+
+const user = authStore.user
 const props = defineProps({
   currentCategory: {
     type: String,
@@ -26,7 +29,20 @@ const props = defineProps({
           </p>
         </div>
         <router-link
-          :to="{ name: 'profile', params: { userId: user?.id }, query: { activeTab: 'upload' } }"
+          v-if="user"
+          :to="{
+            name: 'profile',
+            params: { userId: user?.id },
+            query: { activeTab: 'upload' },
+          }"
+          class="bg-white text-blue-500 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition"
+        >
+          <span class="hidden sm:block">Upload to This Category</span>
+          <span class="block sm:hidden">Upload</span>
+        </router-link>
+        <router-link
+          v-else
+          to="/login"
           class="bg-white text-blue-500 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition"
         >
           <span class="hidden sm:block">Upload to This Category</span>

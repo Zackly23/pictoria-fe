@@ -67,12 +67,18 @@ const getAllPublicAlbum = async () => {
   })
 
   try {
+    let tag = currentCategory.value
+    if (searchQuery.value != '') {
+      tag = searchQuery.value
+    }
+
+    console.log('tag : ', tag)
     const response = await axios.get(`${API_BASE_URL}/api/v1/category/albums`, {
       params: {
         page: currentPageNumber.value,
         limit: 12,
         sort_by: sortOrder.value,
-        tag: currentCategory.value,
+        tag: tag,
         search: searchQuery.value,
       },
     })

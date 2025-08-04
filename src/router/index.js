@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import HomeView from '../views/HomeView.vue'
 import MainLayout from '@/layouts/MainLayout.vue'
 import AuthView from '@/views/AuthView.vue'
@@ -133,6 +134,19 @@ const router = createRouter({
       },
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const authOnlyGuestRoutes = ['/login', '/signup', '/reset-password']
+
+  const auth = useAuthStore()
+
+  // Jika sudah login dan mencoba ke halaman login/signup, redirect ke home
+  if (auth.isLogin && authOnlyGuestRoutes.includes(to.path)) {
+    return next('/') // bisa ganti dengan dashboard atau halaman lain
+  }
+
+  next()
 })
 
 // Update title berdasarkan meta title setiap kali route berubah

@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import api from '@/api'
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+
 
 const deleteConfirmation = ref('')
 
@@ -17,9 +20,11 @@ const deleteAccount = async () => {
 
       console.log('response deactivate: ', response.data)
 
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('user')
+      // localStorage.removeItem('access_token')
+      // localStorage.removeItem('refresh_token')
+      // localStorage.removeItem('user')
+
+      authStore.logout()
 
       window.location.href = '/'
     } else {

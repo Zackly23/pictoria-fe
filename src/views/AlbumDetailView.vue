@@ -8,9 +8,12 @@ import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+
 const route = useRoute()
 const router = useRouter()
-const user = JSON.parse(localStorage.getItem('user'))
+const user = authStore.user
 const albumID = route.params.albumId
 const viewMode = ref(1) // 1 for grid view, 2 for list view
 const sortOrder = ref('asc')

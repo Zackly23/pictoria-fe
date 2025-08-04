@@ -4,8 +4,11 @@ import { ref, computed, onMounted } from 'vue'
 import AddTargetEmailModalComponent from './AddTargetEmailModalComponent.vue'
 import UploadModalComponent from '../UploadSectionComponent/UploadModalComponent.vue'
 import ImagePreviewZoomComponent from '../UploadSectionComponent/ImagePreviewZoomComponent.vue'
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
 
-const user = JSON.parse(localStorage.getItem('user'))
+
+const user = authStore.user
 const isLoading = ref(true)
 const uploadModal = ref(false)
 const previewModal = ref(false)

@@ -2,10 +2,12 @@
 import api from '@/api'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
-const user = JSON.parse(localStorage.getItem('user'))
+const user = authStore.user
 const albumID = route.params.albumId
 
 const showComments = ref(false)
