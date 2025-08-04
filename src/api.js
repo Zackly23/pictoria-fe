@@ -28,8 +28,8 @@ api.interceptors.response.use(
 
       try {
         // Minta token baru dari server (cookie-based)
-        await axios.post(
-          `${API_BASE_URL}/refresh`,
+        await api.post(
+          `/auth/refresh`,
           {},
           {
             withCredentials: true, // ⬅️ Kirim cookie refresh_token
