@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from './stores/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -13,6 +14,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    const authStore = useAuthStore()
     const originalRequest = error.config
 
     if (originalRequest?.skipAuthErrorHandler) {
@@ -26,6 +28,9 @@ api.interceptors.response.use(
         }) // Sudah dalam scope /api/v1
         return api(originalRequest)
       } catch (refreshError) {
+
+        authStore.logout()
+
         window.location.href = '/login'
         return Promise.reject(refreshError)
       }

@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user')) || null,
-    isLogin: !!localStorage.getItem('user'),
-    accessToken: localStorage.getItem('access_token') || null,
-    refreshToken: localStorage.getItem('refresh_token') || null,
+    user: null,
+    isLogin: false,
+    accessToken: null,
+    refreshToken: null,
     subsription: null,
   }),
   getters: {
@@ -15,6 +17,18 @@ export const useAuthStore = defineStore('auth', {
     getUser: (state) => state.user,
   },
   actions: {
+    async fetchUserFromApi() {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/v1/users/me`, {
+          withCredentials: true,
+        })
+
+        this.user = response.data.user
+        this.isLogin = true
+      } catch (error) {
+        this.logout()
+      }
+    },
     setUser(user) {
       this.user = user
       this.isLogin = true
@@ -36,10 +50,10 @@ export const useAuthStore = defineStore('auth', {
       this.subsription = null
       this.isLogin = false
 
-      localStorage.removeItem('user')
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('last_visited_page')
+      // localStorage.removeItem('user')
+      // localStorage.removeItem('access_token')
+      // localStorage.removeItem('refresh_token')
+      // localStorage.removeItem('last_visited_page')
     },
   },
 })
