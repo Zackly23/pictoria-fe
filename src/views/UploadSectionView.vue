@@ -14,7 +14,7 @@ const userData = computed(() => authStore.user)
 const errorsAlbumUpload = ref()
 const router = useRouter()
 const route = useRoute()
-const user = JSON.parse(localStorage.getItem('user'))
+const user = authStore.user
 const dragActive = ref(false)
 const uploadProgress = ref(0)
 const targetEmailInput = ref('')

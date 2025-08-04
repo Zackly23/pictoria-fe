@@ -20,9 +20,9 @@ const signOut = async () => {
     const response = await api.post('/logout', {}, { skipAuthErrorHandler: true })
 
     if (response.status === 200) {
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('user')
+      // localStorage.removeItem('access_token')
+      // localStorage.removeItem('refresh_token')
+      // localStorage.removeItem('user')
 
       authStore.logout() // clear store juga
 
@@ -35,7 +35,9 @@ const signOut = async () => {
 
 // Optional: sync authStore from localStorage on mount
 onMounted(() => {
-  const user = JSON.parse(localStorage.getItem('user'))
+  console.log('user data oinia : ', authStore.user)
+
+  const user = authStore.user
   if (user) {
     authStore.setUser(user)
   }
@@ -105,7 +107,6 @@ onMounted(() => {
               <div
                 class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-bold"
               >
-
                 {{ userProfile?.first_name[0] + userProfile?.last_name[0] ?? 'PV' }}
               </div>
               <svg

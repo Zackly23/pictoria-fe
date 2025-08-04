@@ -39,7 +39,7 @@ const getTemporaryMediaUrl = async () => {
     }
   } catch (error) {
     console.error('Error fetching temporary media:', error)
-    router.push('/404')
+    // router.push('/404')
   }
 }
 

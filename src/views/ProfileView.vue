@@ -349,6 +349,7 @@ onMounted(() => {
   }
   console.log('route.params.userId:', route.params.userId)
 
+
   getRecentPhotos()
   getAllAlbums()
   getUserProfile()

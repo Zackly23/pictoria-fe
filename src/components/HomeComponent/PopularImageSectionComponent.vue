@@ -20,21 +20,21 @@ const featuredImages = ref([
   },
 ])
 
-const goToUpload = () => {
-  if (user) {
-    router
-      .push({
-        name: 'profile',
-        params: { userId: user.id },
-        query: { activeTab: 'upload' },
-      })
-      .catch((error) => {
-        console.error('Navigation error:', error)
-      })
-  } else {
-    window.location.href = '/login'
-  }
-}
+// const goToUpload = () => {
+//   if (user) {
+//     router
+//       .push({
+//         name: 'profile',
+//         params: { userId: user?.id },
+//         query: { activeTab: 'upload' },
+//       })
+//       .catch((error) => {
+//         console.error('Navigation error:', error)
+//       })
+//   } else {
+//     window.location.href = '/login'
+//   }
+// }
 
 const getPopularImages = async () => {
   try {
@@ -87,10 +87,10 @@ onMounted(() => {
 
     <div class="text-center mt-8">
       <router-link
-        v-if="user"
+        v-if="user?.id"
         :to="{
           name: 'profile',
-          params: { userId: user.id },
+          params: { userId: user?.id },
           query: { activeTab: 'upload' },
         }"
         class="text-blue-500 hover:text-blue-700 font-medium inline-flex items-center cursor-pointer"

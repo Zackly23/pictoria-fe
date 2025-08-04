@@ -154,17 +154,22 @@ const userLogin = async () => {
   console.log('token : ', token.value)
 
   try {
-    const response = await api.post('/auth/login', {
-      email: emailLogin.value,
-      password: passwordLogin.value,
-      token: token.value,
-    })
+    const response = await api.post(
+      '/auth/login',
+      {
+        email: emailLogin.value,
+        password: passwordLogin.value,
+        token: token.value,
+      },
+      {
+        withCredentials: true,
+      },
+    )
 
     if (response.status === 200) {
-      
       user.value = response.data.user
-      accessToken.value = response.data.access_token
-      refreshToken.value = response.data.refresh_token
+      // accessToken.value = response.data.access_token
+      // refreshToken.value = response.data.refresh_token
 
       const isTFAactive = user.value.is_two_factor_enabled
       console.log('user value bos: ', user.value)
@@ -172,10 +177,12 @@ const userLogin = async () => {
         totpModalOpen.value = true
       } else {
         authStore.setUser(user.value)
-        authStore.setToken(accessToken.value, refreshToken.value)
+        // authStore.setToken(accessToken.value, refreshToken.value)
 
         // const lastPage = localStorage.getItem('last_visited_page')
         console.log('woy')
+        
+        console.log('user : ', authStore)
         router.push(`/profile/${user.value.id}`)
       }
     } else {
@@ -496,7 +503,7 @@ onUnmounted(() => {
                     </p>
                   </div>
 
-                    <!-- <div class="mb-6 flex items-center">
+                  <!-- <div class="mb-6 flex items-center">
                       <input
                         type="checkbox"
                         id="remember"

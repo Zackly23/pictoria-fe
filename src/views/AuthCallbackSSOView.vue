@@ -23,10 +23,16 @@ const userProfile = ref({
   maximum_media_size: '',
 })
 
-const getUserProfile = async (userDataID) => {
+const getUserProfile = async (userDataID, token) => {
   try {
     // Simulate an API call to fetch user profile
-    const response = await api.get(`/users/${userDataID}`)
+    const response = await api.get(`/auth/me/${userDataID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
 
     console.log('User Profile: ', response.data)
 
@@ -45,7 +51,7 @@ const getUserProfile = async (userDataID) => {
 
     if (response.status === 200) {
       authStore.setUser(userProfile.value)
-
+      
       return true
     }
   } catch (error) {
@@ -56,16 +62,17 @@ const getUserProfile = async (userDataID) => {
 }
 
 onMounted(async () => {
-  const access_token = route.query.access_token
-  const refresh_token = route.query.refresh_token
+  // const access_token = route.query.access_token
+  // const refresh_token = route.query.refresh_token
+  const code = route.query.code
   const user_id = route.query.user_id
 
-  if (access_token && refresh_token && user_id) {
+  if (code && user_id) {
     try {
-      localStorage.setItem('access_token', access_token)
-      localStorage.setItem('refresh_token', refresh_token)
+      // localStorage.setItem('access_token', access_token)
+      // localStorage.setItem('refresh_token', refresh_token)
 
-      const success = await getUserProfile(user_id)
+      const success = await getUserProfile(user_id, code)
 
       if (success) {
         const last_visit = localStorage.getItem('last_visited_page')
@@ -80,7 +87,7 @@ onMounted(async () => {
           last_visit !== thisPagePath
         ) {
           console.log('Redirecting to last visited page... : ', last_visit)
-        //   localStorage.removeItem('last_visited_page') // clear to avoid loop
+          //   localStorage.removeItem('last_visited_page') // clear to avoid loop
           router.push(last_visit)
         } else {
           console.log('Redirecting to home page...')
@@ -97,7 +104,6 @@ onMounted(async () => {
         console.error('Login failed. Redirecting to login page...')
         router.push('/login')
       }
-      
     } catch (error) {
       console.error('Login Error:', error)
       errorMessage.value = 'Login failed. Please try again.'
