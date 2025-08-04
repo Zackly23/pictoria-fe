@@ -8,7 +8,6 @@ import Toast from 'primevue/toast'
 import App from './App.vue'
 import router from './router'
 import Aura from '@primeuix/themes/aura'
-import { useAuthStore } from './stores/auth'
 
 if (import.meta.env.MODE === 'production') {
   console.log = () => {}
@@ -32,8 +31,3 @@ app.use(PrimeVue, {
 app.use(router)
 
 app.mount('#app')
-
-onMounted(() => {
-  const auth = useAuthStore()
-  auth.fetchUserProfile()
-})
