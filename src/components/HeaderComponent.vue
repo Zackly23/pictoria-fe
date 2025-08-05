@@ -24,6 +24,9 @@ const signOut = async () => {
       // localStorage.removeItem('refresh_token')
       // localStorage.removeItem('user')
 
+      const thisPagePath = route.fullPath
+
+      localStorage.setItem('last_visited_page', thisPagePath)
       authStore.logout() // clear store juga
 
       window.location.href = '/'
