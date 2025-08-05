@@ -36,6 +36,7 @@ const signOut = async () => {
 // Optional: sync authStore from localStorage on mount
 onMounted(() => {
   console.log('user data oinia : ', authStore.user)
+  console.log('ism login : ', isLogin.value)
 
   const user = authStore.user
   if (user) {
