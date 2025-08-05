@@ -2,8 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/api'
+import { useRoute, useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
+
+const route = useRoute()
+const router = useRouter()
 
 const open = ref(false)
 
@@ -29,7 +33,7 @@ const signOut = async () => {
       localStorage.setItem('last_visited_page', thisPagePath)
       authStore.logout() // clear store juga
 
-      window.location.href = '/'
+      router.push('/')
     }
   } catch (error) {
     console.error(error.response?.data || error.message)
