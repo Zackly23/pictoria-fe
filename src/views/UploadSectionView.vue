@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { v4 as uuidv4 } from 'uuid'
 import { validateAlbumUpload } from '@/validations/AlbumValidation'
+import LoadingSpinModalComponent from '@/components/ProfileSectionComponent/LoadingSpinModalComponent.vue'
 import api from '@/api'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/auth'
@@ -10,6 +11,7 @@ import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const toast = useToast()
 const userData = computed(() => authStore.user)
+const isUploadLoading = ref(false)
 
 const errorsAlbumUpload = ref()
 const router = useRouter()
@@ -139,6 +141,9 @@ const updateAlbum = async () => {
       return
     }
 
+    isUploadLoading.value = true
+
+
     const formData = new FormData()
     formData.append('user_id', user.id)
     // Tags (tanpa index)
@@ -209,6 +214,7 @@ const updateAlbum = async () => {
     })
 
     if (response.status === 202) {
+      isUploadLoading.value = false
       toast.add({
         severity: 'success',
         summary: 'Album Updated',
@@ -762,6 +768,8 @@ onMounted(() => {
       </li>
     </ul>
   </section>
+
+  <LoadingSpinModalComponent :show="isUploadLoading"/>
 </template>
 
 <style scoped>
