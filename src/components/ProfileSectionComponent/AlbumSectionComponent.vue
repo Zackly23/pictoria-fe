@@ -84,6 +84,13 @@ const changePaginationNumber = (number) => {
   emits('change-page', number)
 }
 
+const truncateDescription = (text) => {
+  if (!text) return ''
+  const words = text.trim().split(/\s+/)
+  if (words.length <= 100) return text.trim()
+  return words.slice(0, 100).join(' ') + '...'
+}
+
 console.log('ada albums = ? ', props?.albums)
 console.log('ada file : ', props.albums.files)
 </script>
@@ -298,7 +305,7 @@ console.log('ada file : ', props.albums.files)
         </div>
         <div class="p-4">
           <p class="text-gray-600 mb-4" :class="viewMode === 'more-grid' ? 'hidden' : ''">
-            {{ album.description }}
+            {{ truncateDescription(album.description) }}
           </p>
           <div class="flex justify-between items-center">
             <span class="text-gray-500 text-sm">Updated {{ album.updatedAt }}</span>
