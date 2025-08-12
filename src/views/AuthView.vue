@@ -525,7 +525,7 @@ onUnmounted(() => {
                 </div>
 
                 <p class="mt-6 text-center text-gray-600">
-                  <span>New to PixelVault? </span>
+                  <span>New to PixoVault? </span>
                   <button
                     @click="changeRoute('signup')"
                     class="text-blue-500 hover:text-blue-700 font-medium cursor-pointer"
