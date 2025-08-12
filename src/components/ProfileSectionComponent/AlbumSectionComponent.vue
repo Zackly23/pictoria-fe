@@ -87,8 +87,8 @@ const changePaginationNumber = (number) => {
 const truncateDescription = (text) => {
   if (!text) return ''
   const words = text.trim().split(/\s+/)
-  if (words.length <= 100) return text.trim()
-  return words.slice(0, 100).join(' ') + '...'
+  if (words.length <= 10) return text.trim()
+  return words.slice(0, 10).join(' ') + '...'
 }
 
 console.log('ada albums = ? ', props?.albums)
