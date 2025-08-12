@@ -3,11 +3,14 @@ import api from '@/api'
 import router from '@/router'
 import { ref, computed } from 'vue'
 import { validateAlbumUpload } from '@/validations/AlbumValidation'
+import LoadingSpinModalComponent from '../ProfileSectionComponent/LoadingSpinModalComponent.vue'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
 const errorsAlbumUpload = ref()
 const emits = defineEmits(['store-new-album-handler'])
+const isUploadLoading = ref(false)
+
 const props = defineProps({
   userData: {
     type: Object,
@@ -71,6 +74,7 @@ const storeNewAlbum = async () => {
       return
     }
 
+    isUploadLoading.value = true
     const formData = new FormData()
 
     // Title, Description, Privacy
@@ -114,6 +118,7 @@ const storeNewAlbum = async () => {
     console.log('Upload sukses:', response.data)
 
     if (response.status === 201) {
+      isUploadLoading.value = false
       console.log('to albun sadada')
       toast.add({
         severity: 'success',
@@ -158,9 +163,9 @@ function handleFileChange(e) {
   const inputFiles = Array.from(e.target.files)
   inputFiles.forEach((file, index) => {
     let maxSizeBytes = parseInt(props.userData?.maximumMediaSize ?? 0, 10)
-    console.log("size file : ", file.size)
+    console.log('size file : ', file.size)
     console.log('props user : ', props.userData)
-    console.log("max : ", maxSizeBytes)
+    console.log('max : ', maxSizeBytes)
     if (file && file.size > maxSizeBytes) {
       toast.add({
         severity: 'error',
@@ -575,4 +580,6 @@ console.log('di uploadsectioncomponent : ', props.userData)
       </button>
     </div>
   </div>
+
+  <LoadingSpinModalComponent :show="isUploadLoading" />
 </template>
